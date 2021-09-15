@@ -1,6 +1,7 @@
 import { CommandManager } from './CommandManager';
+import { Session } from './Session';
 
-import { Client, Intents } from 'discord.js';
+import { Client, Intents, StageChannel, VoiceChannel } from 'discord.js';
 
 export class DJDog
 {
@@ -11,8 +12,38 @@ export class DJDog
 
         this.client = new Client({ intents: [Intents.FLAGS.GUILDS] });
         this.cm = new CommandManager(this);
+        this.sessions = [];
 
         this.client.login(this.token);
+
+        this.client.on('ready', () => {
+            console.log("Ready!!");
+        })
+    }
+
+    public AddSession(channel: VoiceChannel | StageChannel)
+    {
+        for(let session of this.sessions)
+        {
+            if(session.channel == channel)
+            {
+                //duplicate session
+                return;
+            }
+        }
+
+        this.sessions[this.sessions.length] = new Session(channel);
+    }
+
+    public EndSession(channel: VoiceChannel | StageChannel)
+    {
+        this.sessions.forEach( (item, index) => {
+            if(item.channel == channel)
+            {
+                item.leave();
+                this.sessions.splice(index, 1);
+            }
+        });
     }
 
     public token:       string;
@@ -20,4 +51,5 @@ export class DJDog
 
     public client:      Client;
     private cm:         CommandManager;
+    public sessions:    Session[];
 };

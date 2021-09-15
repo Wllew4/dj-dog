@@ -6,5 +6,13 @@
     {
         "name": "pong",
         "description": "test command, replies \"ping\""
+    },
+    {
+        "name": "join",
+        "description": "join the current voice channel"
+    },
+    {
+        "name": "leave",
+        "description": "leave the current voice channel"
     }
 ]
