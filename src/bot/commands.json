@@ -1,0 +1,10 @@
+[
+    {
+        "name": "ping",
+        "description": "test command, replies \"pong\""
+    },
+    {
+        "name": "pong",
+        "description": "test command, replies \"ping\""
+    }
+]
