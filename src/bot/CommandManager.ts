@@ -1,7 +1,7 @@
 import { DJDog } from './DJDog';
 import commands from './commands.json';
 
-import { GuildMember, Interaction } from 'discord.js';
+import { GuildMember, Interaction, TextChannel } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
@@ -20,8 +20,6 @@ export async function refreshSlashCommands(this: DJDog)
                 '887541961161080883'
             ),
             { body: commands });
-
-        console.log('Successfully registered commands');
     }
     catch (e)
     {
@@ -29,41 +27,72 @@ export async function refreshSlashCommands(this: DJDog)
     }
 }
 
-export async function  createInteractions(this: DJDog)
+export async function createInteractions(this: DJDog)
 {
     this.client.on('interactionCreate', async (i: Interaction) =>
     {
         //type-checking
         if(!i.isCommand()) return;
-        const session = this.getSession(i);
-        if(!session) return;
-        if(!(i.member instanceof GuildMember && i.member.voice.channel)) return;
+        if(!(i.channel instanceof TextChannel)) return;
+        if(!(i.member instanceof GuildMember)) return;
 
-        //command switch
+        //Commands that don't require a session
         switch(i.commandName)
         {
             case 'ping':
                 await i.reply('pong!');
-                break;
+                return;
 
             case 'pong':
                 await i.reply('ping!');
-                break;
+                return;
+        }
 
+        //get session
+        if(!(i.member.voice.channel))
+        {
+            i.reply('You are not in a voice channel!');
+            return;
+        }
+        const session = this.getSession(i.member.voice.channel, i.channel);
+        
+        //Commands that DO require a session
+        switch(i.commandName)
+        {
             case 'join':
                 session.join();
                 i.reply(`Joining voice channel: ${i.member.voice.channel.name}`);
-                break;
+                return;
 
             case 'leave':
-                this.endSession(i);
+                this.endSession(session);
                 i.reply(`Leaving voice channel: ${i.member.voice.channel.name}`);
-                break;
+                return;
 
             case 'play':
                 session.play(i.options.getString('song', true));
                 i.reply(`Added ${i.options.getString("song", true)} to the queue.`)
-                break;
+                return;
+
+            case 'queue':
+                i.reply( await session.showQueue());
+                return;
+
+            case 'skip':
+                const skipped = await session.skip();
+                if(skipped)
+                    i.reply('Skipped!');
+                else
+                    i.reply('The queue is empty!');
+                return;
+
+            case 'pause':
+                const isPaused: boolean = await session.pause();
+                i.reply(
+                    (isPaused ? 'Paused': 'Unpaused')
+                    + ' playback.'
+                );
+                return;
         }
     });
 }

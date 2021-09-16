@@ -3,20 +3,20 @@ import { Session } from './Session'
 
 import {
     Client,
-    CommandInteraction,
-    GuildMember,
     Intents,
-    TextChannel
+    StageChannel,
+    TextChannel,
+    VoiceChannel
 } from 'discord.js';
 
 
 export class DJDog
 {
-    public constructor(_token: string, _client_id: string)
+    public constructor(token: string, client_id: string)
     {
-        this.token      = _token;
-        this.client_id  = _client_id;
-        this.client     = new Client({ intents: [Intents.FLAGS.GUILDS] });
+        this.token      = token;
+        this.client_id  = client_id;
+        this.client     = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES] });
 
         this.refreshSlashCommands();
         this.createInteractions();
@@ -29,40 +29,27 @@ export class DJDog
         })
     }
 
-    public getSession(i: CommandInteraction): Session | undefined
+    public getSession(vChannel: VoiceChannel | StageChannel, tChannel: TextChannel): Session
     {
-        if(i.member instanceof GuildMember
-            && i.member.voice.channel
-            && i.channel instanceof TextChannel)
+        for(let session of this.sessions)
         {
-            const channel = i.member.voice.channel;
-
-            for(let session of this.sessions)
+            if(session.vChannel == vChannel)
             {
-                if(session.vChannel == channel)
-                {
-                    return session;
-                }
+                return session;
             }
-            return this.sessions[this.sessions.push(new Session(channel, i.channel)) - 1];
         }
-        i.reply('You need to be in a voice channel!');
+        return this.sessions[this.sessions.push(new Session(this, vChannel, tChannel)) - 1];
     }
 
-    public endSession(i: CommandInteraction)
+    public endSession(s: Session)
     {
-        if(i.member instanceof GuildMember && i.member.voice.channel)
-        {
-            const channel = i.member.voice.channel;
-
-            this.sessions.forEach( (item, index) => {
-                if(item.vChannel == channel)
-                {
-                    item.leave();
-                    this.sessions.splice(index, 1);
-                }
-            });
-        }
+        this.sessions.forEach( (item, index) => {
+            if(item == s)
+            {
+                item.leave();
+                this.sessions.splice(index, 1);
+            }
+        });
     }
 
     protected token:        string;
