@@ -1,17 +1,15 @@
 import { waitForMs } from "../util/util";
 
-import { StageChannel, VoiceChannel } from "discord.js";
+import { VoiceConnection } from "@discordjs/voice";
 
 export class AudioManager
 {
-  public constructor(channel: VoiceChannel | StageChannel)
+  public constructor(private channel: VoiceConnection)
   {
-    this.channel = channel;
-
     this.paused = false;
   }
 
-  public async play(path: string)
+  public async play(url: string)
   {
     //Plays the file passed in as path
     //returns when song is done
@@ -38,6 +36,4 @@ export class AudioManager
   }
 
     private paused: boolean;
-
-    private channel: VoiceChannel | StageChannel;
 };
