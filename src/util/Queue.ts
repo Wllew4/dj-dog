@@ -5,9 +5,14 @@ export class Queue<T>
         this.data.push(item);
     }
 
-    public get(): T | undefined
+    public get(): T
     {
-        return this.data.shift();
+        return this.data[0];
+    }
+
+    public advance()
+    {
+        this.data.shift();
     }
 
     public length(): number

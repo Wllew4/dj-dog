@@ -19,13 +19,13 @@ export class Session
     {
         //30s of inactivity -> disconnect
         this.timeout = 10 * 1000;
+        this.checkingTimeout = false;
 
         this.DJ = dj;
         this.vChannel = vChannel;
         this.tChannel = tChannel;
 
         this.queue = new Queue<Track>();
-        this.nowPlaying = new Track('');
         this.audioManager = new AudioManager(this.vChannel);
 
         //TEST
@@ -74,7 +74,6 @@ export class Session
     public async play(url: string)
     {
         this.queue.add(new Track(url));
-        console.log(this.queue);
         if(this.queue.length() == 1)
         {
             while(this.queue.length() > 0)
@@ -82,21 +81,20 @@ export class Session
                 const nextTrack = this.queue.get();
                 if(nextTrack)
                 {
-                    this.nowPlaying = nextTrack;
                     await this.audioManager.play(nextTrack.path);
-                    console.log("finished song: " + nextTrack.url);
                 }
                 else
                     console.error('ERROR: Queue length is 1 but couldn\'t get song??');
+
+                this.queue.advance();
+                this.inactivityCheck();
             }
         }
     }
 
     public async showQueue(): Promise<string>
     {
-        let o: string = `\`\`\`
-            Now playing: ${this.nowPlaying.url}\n
-            ${this.queue.length()} items in queue:\n`;
+        let o: string = `\`\`\`${this.queue.length()} items in queue:\n`;
         for(let i = 0; i < this.queue.length(); i++)
         {
             o += `${i+1}. ${this.queue.at(i).url}\n`;
@@ -107,8 +105,9 @@ export class Session
 
     public async skip(): Promise<boolean>
     {
-        this.inactivityCheck();
         const nextTrack = this.queue.get();
+        this.queue.advance();
+        this.inactivityCheck();
         if(nextTrack)
         {
             this.audioManager.play(nextTrack.path);
@@ -127,18 +126,23 @@ export class Session
 
     private async inactivityCheck()
     {
+        if(this.checkingTimeout) return;
+        this.checkingTimeout = true;
+
         await waitForMs(this.timeout);
         if(this.queue.length() == 0)
         {
             this.tChannel.send("Left due to inactivity");
             this.DJ.endSession(this);
         }
+
+        this.checkingTimeout = false;
     }
 
     private timeout:        number;
+    private checkingTimeout:boolean;
 
     private queue:          Queue<Track>;
-    private nowPlaying:     Track;
     private audioManager:   AudioManager;
 
     private DJ:             DJDog;
