@@ -12,5 +12,18 @@
   "license": "ISC",
   "devDependencies": {
     "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@discordjs/builders": "^0.6.0",
+    "@discordjs/rest": "^0.1.0-canary.0",
+    "@discordjs/voice": "^0.6.0",
+    "discord.js": "^13.1.0",
+    "install": "^0.13.0",
+    "libsodium-wrappers": "^0.7.9",
+    "npm": "^7.23.0",
+    "opusscript": "^0.0.8",
+    "tweetnacl": "^1.0.3",
+    "youtube-audio-stream": "^0.3.17",
+    "youtube-dl-exec": "^1.2.6"
   }
 }
