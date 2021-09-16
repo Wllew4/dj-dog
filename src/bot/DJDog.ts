@@ -9,6 +9,7 @@ import {
     TextChannel
 } from 'discord.js';
 
+
 export class DJDog
 {
     public constructor(_token: string, _client_id: string)

@@ -5,6 +5,7 @@ import { GuildMember, Interaction } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
+
 export async function refreshSlashCommands(this: DJDog)
 {
     const rest = new REST({ version: '9' }).setToken(this.token);
@@ -58,7 +59,7 @@ export async function  createInteractions(this: DJDog)
                 this.endSession(i);
                 i.reply(`Leaving voice channel: ${i.member.voice.channel.name}`);
                 break;
-                
+
             case 'play':
                 session.play(i.options.getString('song', true));
                 i.reply(`Added ${i.options.getString("song", true)} to the queue.`)

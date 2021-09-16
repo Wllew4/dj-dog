@@ -1,4 +1,5 @@
 import { Track } from './Track';
+import { Queue } from './Queue';
 
 import { StageChannel, TextChannel, VoiceChannel } from 'discord.js';
 import {
@@ -8,6 +9,7 @@ import {
     VoiceConnection
 } from '@discordjs/voice';
 
+
 export class Session
 {
     constructor(vChannel: VoiceChannel | StageChannel, tChannel: TextChannel)
@@ -16,7 +18,7 @@ export class Session
         this.tChannel = tChannel;
         this.controller = new AbortController();
         this.signal = this.controller.signal;
-        this.queue = [];
+        this.queue = new Queue<Track>();
 
         this.connection = joinVoiceChannel({
             channelId: this.vChannel.id,
@@ -52,14 +54,15 @@ export class Session
 
     public async play(url: string)
     {
-        console.log(`parse this url: ${url}`);
+        this.queue.add(new Track(url));
     }
+
+    private queue:       Queue<Track>;
 
     public vChannel:    VoiceChannel | StageChannel;
     private tChannel:   TextChannel;
     private connection: VoiceConnection;
+
     private controller: AbortController;
     private signal:     AbortSignal;
-
-    public queue:       Track[];
 };
