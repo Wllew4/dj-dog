@@ -14,31 +14,31 @@ import {
 
 export class Session
 {
-  constructor(dj: DJDog, vChannel: VoiceChannel | StageChannel, tChannel: TextChannel)
+  private timeout: number;
+  private checkingTimeout:boolean;
+
+  private queue: Queue<Track>;
+  private audioManager: AudioManager;
+
+  private connection: VoiceConnection;
+
+  private controller: AbortController;
+  private signal: AbortSignal;
+
+  constructor(private DJ: DJDog, public vChannel: VoiceChannel | StageChannel, private tChannel: TextChannel)
   {
     //30s of inactivity -> disconnect
     this.timeout = 10 * 1000;
     this.checkingTimeout = false;
-
-    this.DJ = dj;
-    this.vChannel = vChannel;
-    this.tChannel = tChannel;
-
-    this.queue = new Queue<Track>();
-    this.audioManager = new AudioManager(this.vChannel);
-
-    //TEST
-    // this.queue.add(new Track(':) 1'));
-    // this.queue.add(new Track(':) 2'));
-    // this.queue.add(new Track(':) 3'));
-    // this.queue.add(new Track(':) 4'));
-
 
     this.connection = joinVoiceChannel({
       channelId: this.vChannel.id,
       guildId: this.vChannel.guild.id,
       adapterCreator: this.vChannel.guild.voiceAdapterCreator
     });
+
+    this.queue = new Queue<Track>();
+    this.audioManager = new AudioManager(this.connection);
 
     this.controller = new AbortController();
     this.signal = this.controller.signal;
@@ -137,18 +137,4 @@ export class Session
 
     this.checkingTimeout = false;
   }
-
-    private timeout: number;
-    private checkingTimeout:boolean;
-
-    private queue: Queue<Track>;
-    private audioManager: AudioManager;
-
-    private DJ: DJDog;
-    public vChannel: VoiceChannel | StageChannel;
-    private tChannel: TextChannel;
-    private connection: VoiceConnection;
-
-    private controller: AbortController;
-    private signal: AbortSignal;
 };

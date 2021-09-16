@@ -4,6 +4,8 @@ import { VoiceConnection } from "@discordjs/voice";
 
 export class AudioManager
 {
+  private paused: boolean;
+
   public constructor(private channel: VoiceConnection)
   {
     this.paused = false;
@@ -34,6 +36,4 @@ export class AudioManager
     }
     return this.paused;
   }
-
-    private paused: boolean;
 };

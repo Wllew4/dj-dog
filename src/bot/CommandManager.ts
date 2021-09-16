@@ -39,13 +39,13 @@ export async function createInteractions(this: DJDog)
     //Commands that don't require a session
     switch(i.commandName)
     {
-    case 'ping':
-      await i.reply('pong!');
-      return;
+      case 'ping':
+        await i.reply('pong!');
+        return;
 
-    case 'pong':
-      await i.reply('ping!');
-      return;
+      case 'pong':
+        await i.reply('ping!');
+        return;
     }
 
     //get session
@@ -59,40 +59,40 @@ export async function createInteractions(this: DJDog)
     //Commands that DO require a session
     switch(i.commandName)
     {
-    case 'join':
-      session.join();
-      i.reply(`Joining voice channel: ${i.member.voice.channel.name}`);
-      return;
+      case 'join':
+        session.join();
+        i.reply(`Joining voice channel: ${i.member.voice.channel.name}`);
+        return;
 
-    case 'leave':
-      this.endSession(session);
-      i.reply(`Leaving voice channel: ${i.member.voice.channel.name}`);
-      return;
+      case 'leave':
+        this.endSession(session);
+        i.reply(`Leaving voice channel: ${i.member.voice.channel.name}`);
+        return;
 
-    case 'play':
-      session.play(i.options.getString('song', true));
-      i.reply(`Added ${i.options.getString("song", true)} to the queue.`);
-      return;
+      case 'play':
+        session.play(i.options.getString('song', true));
+        i.reply(`Added ${i.options.getString("song", true)} to the queue.`);
+        return;
 
-    case 'queue':
-      i.reply( await session.showQueue());
-      return;
+      case 'queue':
+        i.reply( await session.showQueue());
+        return;
 
-    case 'skip':
-      const skipped = await session.skip();
-      if(skipped)
-        i.reply('Skipped!');
-      else
-        i.reply('The queue is empty!');
-      return;
+      case 'skip':
+        const skipped = await session.skip();
+        if(skipped)
+          i.reply('Skipped!');
+        else
+          i.reply('The queue is empty!');
+        return;
 
-    case 'pause':
-      const isPaused: boolean = await session.pause();
-      i.reply(
-        (isPaused ? 'Paused': 'Unpaused')
-                    + ' playback.'
-      );
-      return;
+      case 'pause':
+        const isPaused: boolean = await session.pause();
+        i.reply(
+          (isPaused ? 'Paused': 'Unpaused')
+          + ' playback.'
+        );
+        return;
     }
   });
 }

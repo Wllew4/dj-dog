@@ -4,7 +4,9 @@ import { unlink } from 'fs';
 
 export class Track
 {
-  public constructor(url: string)
+  public path: string;
+  
+  public constructor(public url: string)
   {
     this.url = url;
 
@@ -23,7 +25,4 @@ export class Track
       if(e) console.error(e);
     });
   }
-
-    public url: string;
-    public path: string;
 };
