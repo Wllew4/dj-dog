@@ -3,7 +3,7 @@ import commands from './commands.json';
 
 import { GuildMember, Interaction, TextChannel } from 'discord.js';
 import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types';
+import { Routes } from 'discord-api-types/v9';
 
 
 export async function refreshSlashCommands(this: DJDog)
@@ -55,7 +55,7 @@ export async function createInteractions(this: DJDog)
       return;
     }
     const session = this.getSession(i.member.voice.channel, i.channel);
-        
+
     //Commands that DO require a session
     switch(i.commandName)
     {

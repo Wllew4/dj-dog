@@ -1,3 +1,3 @@
 interface IFetchStrategy {
-  fetch(url:string): MediaStream;
+  fetch(url:string): Promise<string>;
 }

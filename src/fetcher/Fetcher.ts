@@ -10,8 +10,8 @@ class Fetcher {
     private fetchStrategy: IFetchStrategy
   ) {}
 
-  public fetch(url:string): MediaStream {
-    return this.fetchStrategy.fetch(url);
+  public async fetch(url:string): Promise<string> {
+    return await this.fetchStrategy.fetch(url);
   }
 }
 
@@ -69,8 +69,7 @@ async function tryPlayingAudio(interaction:CommandInteraction, url:string) {
     }});
     vc.subscribe(player);
     interaction.channel?.sendTyping();
-    await youtubedl(url, { f:'bestaudio[ext=m4a]', x:true, audioFormat:'mp3'});
-    const filename = (await youtubedl(url, { f:'bestaudio[ext=m4a]', x:true, audioFormat:'mp3', getFilename:true })).toString().replace('.m4a','.mp3');
+    const filename = await fetch(url);
     interaction.channel?.send(`downloaded ${filename}`);
 
     player.on(AudioPlayerStatus.Playing, () => {
