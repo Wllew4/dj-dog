@@ -1,0 +1,42 @@
+[
+    {
+        "name": "ping",
+        "description": "test command, replies \"pong\""
+    },
+    {
+        "name": "pong",
+        "description": "test command, replies \"ping\""
+    },
+    {
+        "name": "join",
+        "description": "join the current voice channel"
+    },
+    {
+        "name": "leave",
+        "description": "leave the current voice channel"
+    },
+    {
+        "name": "play",
+        "description": "Add a song to the queue",
+        "options": [
+            {
+                "name": "song",
+                "description": "A link to the song you want the bot to play.",
+                "type": 3,
+                "required": true
+            }
+        ]
+    },
+    {
+        "name": "queue",
+        "description": "See what tracks are queued up."
+    },
+    {
+        "name": "skip",
+        "description": "Skip to the next song in the queue."
+    },
+    {
+        "name": "pause",
+        "description": "Pause the current track."
+    }
+]

@@ -13,3 +13,5 @@ token.json
 *.m4a
 *.opus
 *.mp4
+#Bot token
+src/confidential.json
