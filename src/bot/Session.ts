@@ -1,5 +1,7 @@
+import { DJDog } from './DJDog';
+import { AudioManager } from './AudioManager';
 import { Track } from './Track';
-import { Queue } from '../util/Queue';
+import { waitForMs, Queue } from '../util/util';
 
 import { StageChannel, TextChannel, VoiceChannel } from 'discord.js';
 import {
@@ -8,9 +10,6 @@ import {
   VoiceConnectionStatus,
   VoiceConnection
 } from '@discordjs/voice';
-import { waitForMs } from '../util/util';
-import { DJDog } from './DJDog';
-import { AudioManager } from './AudioManager';
 
 
 export class Session

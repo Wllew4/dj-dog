@@ -1,5 +1,6 @@
-import { StageChannel, VoiceChannel } from "discord.js";
 import { waitForMs } from "../util/util";
+
+import { StageChannel, VoiceChannel } from "discord.js";
 
 export class AudioManager
 {
