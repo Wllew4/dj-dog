@@ -12,11 +12,20 @@ import {
 
 export class DJDog
 {
-  public constructor(token: string, client_id: string)
+  protected client: Client;
+  private sessions: Session[];
+
+  private refreshSlashCommands = refreshSlashCommands;
+  private createInteractions = createInteractions;
+
+  public constructor(protected token: string, protected client_id: string)
   {
-    this.token = token;
-    this.client_id = client_id;
-    this.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES] });
+    this.client = new Client({
+      intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_VOICE_STATES
+      ]
+    });
 
     this.refreshSlashCommands();
     this.createInteractions();
@@ -51,13 +60,4 @@ export class DJDog
       }
     });
   }
-
-    protected token: string;
-    protected client_id: string;
-    public client: Client;
-
-    private refreshSlashCommands = refreshSlashCommands;
-    private createInteractions = createInteractions;
-
-    private sessions: Session[];
 };
