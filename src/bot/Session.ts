@@ -1,6 +1,6 @@
-import { Track } from "./Track";
+import { Track } from './Track';
 
-import { StageChannel, VoiceChannel } from "discord.js";
+import { StageChannel, TextChannel, VoiceChannel } from 'discord.js';
 import {
     joinVoiceChannel,
     entersState,
@@ -10,20 +10,19 @@ import {
 
 export class Session
 {
-    constructor(channel: VoiceChannel | StageChannel)
+    constructor(vChannel: VoiceChannel | StageChannel, tChannel: TextChannel)
     {
-        this.channel = channel;
+        this.vChannel = vChannel;
+        this.tChannel = tChannel;
         this.controller = new AbortController();
         this.signal = this.controller.signal;
         this.queue = [];
 
         this.connection = joinVoiceChannel({
-            channelId: this.channel.id,
-            guildId: this.channel.guild.id,
-            adapterCreator: this.channel.guild.voiceAdapterCreator
+            channelId: this.vChannel.id,
+            guildId: this.vChannel.guild.id,
+            adapterCreator: this.vChannel.guild.voiceAdapterCreator
         });
-
-        this.join();
     }
 
     public async join()
@@ -51,7 +50,13 @@ export class Session
         }
     }
 
-    public channel:     VoiceChannel | StageChannel;
+    public async play(url: string)
+    {
+        console.log(`parse this url: ${url}`);
+    }
+
+    public vChannel:    VoiceChannel | StageChannel;
+    private tChannel:   TextChannel;
     private connection: VoiceConnection;
     private controller: AbortController;
     private signal:     AbortSignal;

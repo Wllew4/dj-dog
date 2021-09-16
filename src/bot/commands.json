@@ -14,5 +14,17 @@
     {
         "name": "leave",
         "description": "leave the current voice channel"
+    },
+    {
+        "name": "play",
+        "description": "Add a song to the queue",
+        "options": [
+            {
+                "name": "song",
+                "description": "A link to the song you want the bot to play.",
+                "type": 3,
+                "required": true
+            }
+        ]
     }
 ]

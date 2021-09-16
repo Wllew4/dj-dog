@@ -1,84 +1,68 @@
 import { DJDog } from './DJDog';
 import commands from './commands.json';
 
+import { GuildMember, Interaction } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
-import { Client, GuildMember } from 'discord.js';
 
-export class CommandManager
+export async function refreshSlashCommands(this: DJDog)
 {
-    public constructor(instance: DJDog)
-    {
-        this.dogInstance= instance;
-        this.client     = instance.client;
-        this.token      = instance.token;
-        this.client_id  = instance.client_id;
+    const rest = new REST({ version: '9' }).setToken(this.token);
 
-        this.refreshSlashCommands();
-        this.createInteractions();
+    try
+    {
+        await rest.put(
+            //DEBUG
+            //Change to applicationCommands for release
+            Routes.applicationGuildCommands(
+                this.client_id,
+                '887541961161080883'
+            ),
+            { body: commands });
+
+        console.log('Successfully registered commands');
     }
-
-    private async refreshSlashCommands()
+    catch (e)
     {
-        const rest = new REST({ version: '9' }).setToken(this.token);
-    
-        try
-        {
-            await rest.put(
-                //DEBUG
-                //Change to applicationCommands for release
-                Routes.applicationGuildCommands(
-                    this.client_id,
-                    "887541961161080883"
-                ),
-                { body: commands });
+        console.error(e);
+    }
+}
 
-            console.log("Successfully registered commands");
+export async function  createInteractions(this: DJDog)
+{
+    this.client.on('interactionCreate', async (i: Interaction) =>
+    {
+        //type-checking
+        if(!i.isCommand()) return;
+        const session = this.getSession(i);
+        if(!session) return;
+        if(!(i.member instanceof GuildMember && i.member.voice.channel)) return;
+
+        //command switch
+        switch(i.commandName)
+        {
+            case 'ping':
+                await i.reply('pong!');
+                break;
+
+            case 'pong':
+                await i.reply('ping!');
+                break;
+
+            case 'join':
+                session.join();
+                i.reply(`Joining voice channel: ${i.member.voice.channel.name}`);
+                break;
+
+            case 'leave':
+                this.endSession(i);
+                i.reply(`Leaving voice channel: ${i.member.voice.channel.name}`);
+                break;
+                
+            case 'play':
+                session.play(i.options.getString('song', true));
+                i.reply(`Added ${i.options.getString("song", true)} to the queue.`)
+                break;
         }
-        catch (e)
-        {
-            console.error(e);
-        }
-    }
-
-    private createInteractions()
-    {
-        this.client.on('interactionCreate', async i =>
-        {
-            if(!i.isCommand()) return;
-
-            switch(i.commandName)
-            {
-                case 'ping':
-                    await i.reply('pong!');
-                    break;
-                case 'pong':
-                    await i.reply('ping!');
-                    break;
-                case 'join':
-                    if(i.member instanceof GuildMember && i.member.voice.channel)
-                    {
-                        this.dogInstance.AddSession(i.member.voice.channel);
-                        i.reply("Joining voice channel: " + i.member.voice.channel.name);
-                    }
-                    else
-                        i.reply("Could not find your voice channel :/");
-                    break;
-                case 'leave':
-                    if(i.member instanceof GuildMember && i.member.voice.channel)
-                    {
-                        this.dogInstance.EndSession(i.member.voice.channel);
-                        i.reply("Leaving voice channel: " + i.member.voice.channel.name);
-                    }
-                    else
-                        i.reply("Could not find your voice channel :/");
-                    break;
-            }
-        });
-    }
-
-    private dogInstance:DJDog;
-    private client:     Client;
-    private token:      string;
-    private client_id:  string;
-};
+    });
+}
