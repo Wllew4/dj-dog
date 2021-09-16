@@ -1,6 +1,6 @@
 import youtubedl from 'youtube-dl-exec';
 
-class YoutubeUrlFetchStrategy implements IFetchStrategy  {
+class YoutubeUrlFetchStrategy implements IFetchStrategy {
   constructor(){
   }
   fetch(url: string): MediaStream {

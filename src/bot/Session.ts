@@ -3,10 +3,10 @@ import { Queue } from '../util/Queue';
 
 import { StageChannel, TextChannel, VoiceChannel } from 'discord.js';
 import {
-    joinVoiceChannel,
-    entersState,
-    VoiceConnectionStatus,
-    VoiceConnection
+  joinVoiceChannel,
+  entersState,
+  VoiceConnectionStatus,
+  VoiceConnection
 } from '@discordjs/voice';
 import { waitForMs } from '../util/util';
 import { DJDog } from './DJDog';
@@ -15,141 +15,141 @@ import { AudioManager } from './AudioManager';
 
 export class Session
 {
-    constructor(dj: DJDog, vChannel: VoiceChannel | StageChannel, tChannel: TextChannel)
+  constructor(dj: DJDog, vChannel: VoiceChannel | StageChannel, tChannel: TextChannel)
+  {
+    //30s of inactivity -> disconnect
+    this.timeout = 10 * 1000;
+    this.checkingTimeout = false;
+
+    this.DJ = dj;
+    this.vChannel = vChannel;
+    this.tChannel = tChannel;
+
+    this.queue = new Queue<Track>();
+    this.audioManager = new AudioManager(this.vChannel);
+
+    //TEST
+    // this.queue.add(new Track(':) 1'));
+    // this.queue.add(new Track(':) 2'));
+    // this.queue.add(new Track(':) 3'));
+    // this.queue.add(new Track(':) 4'));
+
+
+    this.connection = joinVoiceChannel({
+      channelId: this.vChannel.id,
+      guildId: this.vChannel.guild.id,
+      adapterCreator: this.vChannel.guild.voiceAdapterCreator
+    });
+
+    this.controller = new AbortController();
+    this.signal = this.controller.signal;
+  }
+
+  public async join()
+  {
+    try
     {
-        //30s of inactivity -> disconnect
-        this.timeout = 10 * 1000;
-        this.checkingTimeout = false;
-
-        this.DJ = dj;
-        this.vChannel = vChannel;
-        this.tChannel = tChannel;
-
-        this.queue = new Queue<Track>();
-        this.audioManager = new AudioManager(this.vChannel);
-
-        //TEST
-        // this.queue.add(new Track(':) 1'));
-        // this.queue.add(new Track(':) 2'));
-        // this.queue.add(new Track(':) 3'));
-        // this.queue.add(new Track(':) 4'));
-
-
-        this.connection = joinVoiceChannel({
-            channelId: this.vChannel.id,
-            guildId: this.vChannel.guild.id,
-            adapterCreator: this.vChannel.guild.voiceAdapterCreator
-        });
-
-        this.controller = new AbortController();
-        this.signal = this.controller.signal;
+      await entersState(this.connection, VoiceConnectionStatus.Ready, this.signal);
+      this.inactivityCheck();
     }
-
-    public async join()
+    catch (e)
     {
-        try
-        {
-            await entersState(this.connection, VoiceConnectionStatus.Ready, this.signal);
-            this.inactivityCheck();
-        }
-        catch (e)
-        {
-            this.controller.abort();
-            console.error(e);
-        }
+      this.controller.abort();
+      console.error(e);
     }
+  }
 
-    public async leave()
+  public async leave()
+  {
+    try
     {
-        try
-        {
-            this.connection.destroy();
-        }
-        catch (e)
-        {
-            console.error(e);
-        }
+      this.connection.destroy();
     }
-
-    public async play(url: string)
+    catch (e)
     {
-        this.queue.add(new Track(url));
-        if(this.queue.length() == 1)
-        {
-            while(this.queue.length() > 0)
-            {
-                const nextTrack = this.queue.get();
-                if(nextTrack)
-                {
-                    await this.audioManager.play(nextTrack.path);
-                }
-                else
-                    console.error('ERROR: Queue length is 1 but couldn\'t get song??');
-
-                this.queue.advance();
-                this.inactivityCheck();
-            }
-        }
+      console.error(e);
     }
+  }
 
-    public async showQueue(): Promise<string>
+  public async play(url: string)
+  {
+    this.queue.add(new Track(url));
+    if(this.queue.length() == 1)
     {
-        let o: string = `\`\`\`${this.queue.length()} items in queue:\n`;
-        for(let i = 0; i < this.queue.length(); i++)
-        {
-            o += `${i+1}. ${this.queue.at(i).url}\n`;
-        }
-        o += `\`\`\``;
-        return o;
-    }
-
-    public async skip(): Promise<boolean>
-    {
+      while(this.queue.length() > 0)
+      {
         const nextTrack = this.queue.get();
-        this.queue.advance();
-        this.inactivityCheck();
         if(nextTrack)
         {
-            this.audioManager.play(nextTrack.path);
-            return true;
+          await this.audioManager.play(nextTrack.path);
         }
         else
-        {
-            return false;
-        }
-    }
+          console.error('ERROR: Queue length is 1 but couldn\'t get song??');
 
-    public async pause(): Promise<boolean>
+        this.queue.advance();
+        this.inactivityCheck();
+      }
+    }
+  }
+
+  public async showQueue(): Promise<string>
+  {
+    let o: string = `\`\`\`${this.queue.length()} items in queue:\n`;
+    for(let i = 0; i < this.queue.length(); i++)
     {
-        return this.audioManager.pause();
+      o += `${i+1}. ${this.queue.at(i).url}\n`;
     }
+    o += `\`\`\``;
+    return o;
+  }
 
-    private async inactivityCheck()
+  public async skip(): Promise<boolean>
+  {
+    const nextTrack = this.queue.get();
+    this.queue.advance();
+    this.inactivityCheck();
+    if(nextTrack)
     {
-        if(this.checkingTimeout) return;
-        this.checkingTimeout = true;
+      this.audioManager.play(nextTrack.path);
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
 
-        await waitForMs(this.timeout);
-        if(this.queue.length() == 0)
-        {
-            this.tChannel.send("Left due to inactivity");
-            this.DJ.endSession(this);
-        }
+  public async pause(): Promise<boolean>
+  {
+    return this.audioManager.pause();
+  }
 
-        this.checkingTimeout = false;
+  private async inactivityCheck()
+  {
+    if(this.checkingTimeout) return;
+    this.checkingTimeout = true;
+
+    await waitForMs(this.timeout);
+    if(this.queue.length() == 0)
+    {
+      this.tChannel.send("Left due to inactivity");
+      this.DJ.endSession(this);
     }
 
-    private timeout:        number;
+    this.checkingTimeout = false;
+  }
+
+    private timeout: number;
     private checkingTimeout:boolean;
 
-    private queue:          Queue<Track>;
-    private audioManager:   AudioManager;
+    private queue: Queue<Track>;
+    private audioManager: AudioManager;
 
-    private DJ:             DJDog;
-    public vChannel:        VoiceChannel | StageChannel;
-    private tChannel:       TextChannel;
-    private connection:     VoiceConnection;
+    private DJ: DJDog;
+    public vChannel: VoiceChannel | StageChannel;
+    private tChannel: TextChannel;
+    private connection: VoiceConnection;
 
-    private controller:     AbortController;
-    private signal:         AbortSignal;
+    private controller: AbortController;
+    private signal: AbortSignal;
 };
