@@ -1,6 +1,8 @@
 import youtubedl, { YtResponse } from 'youtube-dl-exec';
+import { TrackInfo } from '../bot/Track';
+import { IFetchStrategy } from './IFetchStrategy';
 
-class YoutubeUrlFetchStrategy implements IFetchStrategy {
+export class YoutubeUrlFetchStrategy implements IFetchStrategy {
   constructor(){
   }
 
@@ -9,17 +11,20 @@ class YoutubeUrlFetchStrategy implements IFetchStrategy {
     await youtubedl(url, { f:'bestaudio[ext=m4a]', x:true, audioFormat:'mp3'});
   }
 
-  private async getFilename(url:string): Promise<string> {
+  private async getTrackInfo(url:string): Promise<TrackInfo> {
     // without downloading, this simulates the filename output
-    const res = await (youtubedl(url, { f:'bestaudio[ext=m4a]', getFilename:true })).toString();
+    const res = await youtubedl(url, { f:'bestaudio[ext=m4a]', dumpSingleJson:true });
     // filename output simulation uses the wrong extension smh
-    const corrected = res.substring(0, res.length-3) + 'mp3';
-    return corrected;
+    const path = `${res.title}-${res.id}.mp3`;
+    return {
+      path: path,
+      duration: res.duration
+    };
   }
 
-  async fetch(url: string): Promise<string> {
+  async fetch(url: string): Promise<TrackInfo> {
     // return filename once download is ready
-    let [filename] = await Promise.all([this.getFilename(url),this.download(url)]);
-    return filename;
+    const [trackInfo] = await Promise.all([this.getTrackInfo(url),this.download(url)]);
+    return trackInfo;
   }
 }

@@ -1,28 +1,36 @@
 import { unlink } from 'fs';
+import { Fetcher, YoutubeUrlFetchStrategy } from '../fetcher/Fetcher';
 
 //  Needs download() code
 
-export class Track
+interface TrackInfo{
+    path: string,
+    duration: number
+}
+
+class Track
 {
-  public path: string;
-  
-  public constructor(public url: string)
-  {
-    this.url = url;
+  public trackInfo: Promise<TrackInfo>;
 
-    this.path = this.download(this.url);
+  public constructor(
+    public url: string
+  )
+  {
+    this.trackInfo = this.download(url);
   }
 
-  private download(url: string): string
+  private async download(url: string): Promise<TrackInfo>
   {
-    //download track and return file path
-    return '';
+    const fetcher = new Fetcher(new YoutubeUrlFetchStrategy());
+    return fetcher.fetch(url);
   }
 
-  public delete()
+  public async delete()
   {
-    unlink(this.path, e => {
+    unlink((await this.trackInfo).path, e => {
       if(e) console.error(e);
     });
   }
 };
+
+export { Track, TrackInfo };

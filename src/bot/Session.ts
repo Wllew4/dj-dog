@@ -39,6 +39,7 @@ export class Session
 
     this.queue = new Queue<Track>();
     this.audioManager = new AudioManager(this.connection);
+    this.connection.subscribe(this.audioManager.audioPlayer);
 
     this.controller = new AbortController();
     this.signal = this.controller.signal;
@@ -80,7 +81,7 @@ export class Session
         const nextTrack = this.queue.get();
         if(nextTrack)
         {
-          await this.audioManager.play(nextTrack.path);
+          await this.audioManager.play(await nextTrack.trackInfo);
         }
         else
           console.error('ERROR: Queue length is 1 but couldn\'t get song??');
@@ -109,7 +110,7 @@ export class Session
     this.inactivityCheck();
     if(nextTrack)
     {
-      this.audioManager.play(nextTrack.path);
+      this.audioManager.play(await nextTrack.trackInfo);
       return true;
     }
     else
