@@ -39,36 +39,41 @@ export class AudioManager
   public async stream(url: string) {
     try{
       const basicInfo = await ytdl.getBasicInfo(url);
-      const str = ytdl(url, { filter: 'audioonly'});
+      const str = ytdl(url, { filter: 'audioonly', highWaterMark:16777216});
       const resource = createAudioResource(str, { inputType: StreamType.WebmOpus });
       this.audioPlayer.play(resource);
       this.audioPlayer.on('error', error => {
         console.error(error);
-        // retry after 50ms
-
-        const max_retries = 20;
-        let retries = 0;
-        const retryInterval = setTimeout(()=>{
-          retries++;
-          if(this.audioPlayer.unpause()){
-            clearInterval(retryInterval);
-            console.log(`Resuming playback after ${retries} retries.`);
-            return;
-          } else {
-            if (retries>=max_retries){
-              clearInterval(retryInterval);
-              console.log(`Failed resuming playback after ${retries} retries.`);
-              return;
-            }
-          };
-        },50);
+        this.tryResuming();
       });
       const msToWait = parseInt(basicInfo.videoDetails.lengthSeconds) * 1000;
       await waitForMs(msToWait);
     }
     catch(e){
       console.error(e);
+      this.tryResuming();
     }
+  }
+
+  private tryResuming(){
+    // retry after 100ms
+
+    const max_retries = 20;
+    let retries = 0;
+    const retryInterval = setInterval(()=>{
+      retries++;
+      if(this.audioPlayer.unpause()){
+        clearInterval(retryInterval);
+        console.log(`Resumed playback after ${retries} retries.`);
+        return;
+      } else {
+        if (retries>=max_retries){
+          clearInterval(retryInterval);
+          console.log(`Failed resuming playback after ${retries} retries.`);
+          return;
+        }
+      };
+    },100);
   }
 
   public pause(): boolean
