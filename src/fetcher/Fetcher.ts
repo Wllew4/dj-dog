@@ -15,24 +15,6 @@ class Fetcher {
   public async fetch(url:string): Promise<TrackInfo> {
     return await this.fetchStrategy.fetch(url);
   }
-
-  // todo: move this
-
-  // private async probeAndCreateResource(filename: string) {
-  //   const readableStream = createReadStream(filename);
-  //   const { stream, type } = await demuxProbe(readableStream);
-  //   return createAudioResource(stream, { inputType: type });
-  // }
-  
-  // async tryPlayingAudio(url:string) {
-  //     const player = createAudioPlayer({	behaviors: {
-  //       noSubscriber: NoSubscriberBehavior.Pause,
-  //     }});
-  //     vc.subscribe(player);
-  //     const filename = await fetchStrategy.fetch(url);
-  //     const resource = await probeAndCreateResource(filename);
-  //     player.play(resource);
-  // }}
 }
 
 export { Fetcher, YoutubeUrlFetchStrategy };
