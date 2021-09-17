@@ -1,4 +1,5 @@
 import { Track } from './Track';
+import { Session } from './Session';
 import { Queue, waitForMs } from "../util/util";
 
 import {
@@ -13,18 +14,24 @@ import { Converter } from 'ffmpeg-stream';
 
 export class AudioManager
 {
+  private timeoutTime: number = 60;
+  private timeout: NodeJS.Timeout;
+
   public audioPlayer: AudioPlayer;
-  public queue:       Queue<Track>;
-  private paused:     boolean;
+  public queue: Queue<Track>;
+  
+  private paused: boolean;
 
   /**
    * Constructs a new AudioManager object
    * Handles audio playback for a session
    */
-  public constructor()
+  public constructor(private session: Session)
   {
     this.paused = false;
     this.queue = new Queue<Track>();
+    this.timeout = setTimeout(()=>{},0);
+    this.startTimeout();
 
     this.audioPlayer = createAudioPlayer({	behaviors: {
       noSubscriber: NoSubscriberBehavior.Pause,
@@ -34,10 +41,18 @@ export class AudioManager
       if(newState.status == AudioPlayerStatus.Idle && oldState.status != AudioPlayerStatus.Idle)
       {
         //Track concluded
+        this.startTimeout();
         this.queue.advance();
         this.checkQueue();
       }
     });
+  }
+
+  private startTimeout()
+  {
+    this.timeout = setTimeout(() => {
+      this.session.dj.endSession(this.session);
+    }, this.timeoutTime * 1000);
   }
 
   /**
@@ -45,8 +60,14 @@ export class AudioManager
    */
   public async checkQueue()
   {
-    if(this.audioPlayer.state.status != AudioPlayerStatus.Idle || this.queue.length() == 0)
-      //currently playing music or queue is empty
+    if(this.audioPlayer.state.status != AudioPlayerStatus.Idle)
+    {
+      clearTimeout(this.timeout);
+      //currently playing music
+      return;
+    }
+    if(this.queue.length() == 0)
+    //queue is empty
       return;
     
     this.stream();
@@ -56,6 +77,7 @@ export class AudioManager
    * Gets the track from the top of the queue and streams it
    */
   public async stream() {
+    clearTimeout(this.timeout);
     const url = this.queue.get().url;
     try{
       // set up ffmpeg

@@ -61,7 +61,7 @@ export async function createInteractions(this: DJDog)
       i.reply('You are not in a voice channel!');
       return;
     }
-    const session = this.getSession(i.member.voice.channel, i.channel);
+    const session = this.getSession(i.member.voice.channel);
 
     //Commands that DO require a session
     switch(i.commandName)
