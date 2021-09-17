@@ -15,9 +15,15 @@ export class DJDog
   protected client: Client;
   private sessions: Session[];
 
+  //Command initialization methods
   private refreshSlashCommands = refreshSlashCommands;
   private createInteractions = createInteractions;
 
+  /**
+   * Bot class, initializes commands and manages sessions.
+   * @param token bot token, stored in confidential.json
+   * @param client_id client id, stored in confidential.json
+   */
   public constructor(protected token: string, protected client_id: string)
   {
     this.client = new Client({
@@ -38,6 +44,12 @@ export class DJDog
     });
   }
 
+  /**
+   * Finds a session by the voice channel associated with it
+   * @param vChannel Voice channel associated with the session
+   * @param tChannel Text channel associated with the request
+   * @returns A session based on the parameters given
+   */
   public getSession(vChannel: VoiceChannel | StageChannel, tChannel: TextChannel): Session
   {
     for(let session of this.sessions)
@@ -50,6 +62,10 @@ export class DJDog
     return this.sessions[this.sessions.push(new Session(this, vChannel, tChannel)) - 1];
   }
 
+  /**
+   * Ends a session
+   * @param s the session to end
+   */
   public endSession(s: Session)
   {
     this.sessions.forEach( (item, index) => {

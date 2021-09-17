@@ -7,7 +7,12 @@ export class AudioManager
 {
   private paused: boolean;
   public audioPlayer: AudioPlayer;
-  public constructor(private channel: VoiceConnection)
+
+  /**
+   * Constructs a new AudioManager object
+   * Handles audio playback for a session
+   */
+  public constructor()
   {
     this.paused = false;
     this.audioPlayer = createAudioPlayer({	behaviors: {
@@ -25,11 +30,7 @@ export class AudioManager
   {
     const resource = await this.probeAndCreateResource(trackInfo.path);
     this.audioPlayer.play(resource);
-
-    //Plays the file passed in as path
-    //returns when song is done
-
-    //waiting 5 seconds for debugging
+    
     await waitForMs(trackInfo.duration * 1000);
   }
 
