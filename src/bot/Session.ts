@@ -1,9 +1,7 @@
-import { DJDog } from './DJDog';
 import { AudioManager } from './AudioManager';
 import { Track } from './Track';
-import { waitForMs, Queue } from '../util/util';
 
-import { StageChannel, TextChannel, VoiceChannel } from 'discord.js';
+import { StageChannel, VoiceChannel } from 'discord.js';
 import {
   joinVoiceChannel,
   entersState,
@@ -14,10 +12,6 @@ import {
 
 export class Session
 {
-  private timeout: number;
-  private checkingTimeout:boolean;
-
-  private queue: Queue<Track>;
   private audioManager: AudioManager;
 
   private connection: VoiceConnection;
@@ -27,16 +21,10 @@ export class Session
 
   /**
    * Starts a new session.
-   * @param DJ The DJDog instance that manages the session
    * @param vChannel The voice channel associated with the session
-   * @param tChannel The text channel associated with the session
    */
-  constructor(private DJ: DJDog, public vChannel: VoiceChannel | StageChannel, private tChannel: TextChannel)
+  constructor(public vChannel: VoiceChannel | StageChannel)
   {
-    //30s of inactivity -> disconnect
-    this.timeout = 10 * 1000;
-    this.checkingTimeout = false;
-
     this.connection = joinVoiceChannel({
       channelId: this.vChannel.id,
       guildId: this.vChannel.guild.id,
@@ -45,7 +33,6 @@ export class Session
       selfMute: false
     });
 
-    this.queue = new Queue<Track>();
     this.audioManager = new AudioManager();
     this.connection.subscribe(this.audioManager.audioPlayer);
 
@@ -61,7 +48,6 @@ export class Session
     try
     {
       await entersState(this.connection, VoiceConnectionStatus.Ready, this.signal);
-      this.inactivityCheck();
     }
     catch (e)
     {
@@ -91,24 +77,8 @@ export class Session
    */
   public async play(url: string)
   {
-    this.queue.add(new Track(url));
-    if(this.queue.length() == 1)
-    {
-      while(this.queue.length() > 0)
-      {
-        const nextTrack = this.queue.get();
-        if(nextTrack)
-        {
-          // await this.audioManager.play(await nextTrack.trackInfo);
-          await this.audioManager.stream(nextTrack.url);
-        }
-        else
-          console.error('ERROR: Queue length is 1 but couldn\'t get song??');
-
-        this.queue.advance();
-        this.inactivityCheck();
-      }
-    }
+    this.audioManager.queue.add(new Track(url));
+    this.audioManager.checkQueue();
   }
 
   /**
@@ -117,10 +87,11 @@ export class Session
    */
   public async showQueue(): Promise<string>
   {
-    let o: string = `\`\`\`${this.queue.length()} items in queue:\n`;
-    for(let i = 0; i < this.queue.length(); i++)
+    const queue = this.audioManager.queue;
+    let o: string = `\`\`\`${queue.length()} items in queue:\n`;
+    for(let i = 0; i < queue.length(); i++)
     {
-      o += `${i+1}. ${this.queue.at(i).url}\n`;
+      o += `${i+1}. ${queue.at(i).url}\n`;
     }
     o += `\`\`\``;
     return o;
@@ -132,19 +103,11 @@ export class Session
    */
   public async skip(): Promise<boolean>
   {
-    const nextTrack = this.queue.get();
-    this.queue.advance();
-    this.inactivityCheck();
-    if(nextTrack)
-    {
-      // this.audioManager.play(await nextTrack.trackInfo);
-      await this.audioManager.stream(nextTrack.url);
-      return true;
-    }
-    else
-    {
+    this.audioManager.audioPlayer.stop()
+    if(this.audioManager.queue.length() == 0)
       return false;
-    }
+    else
+      return true;
   }
 
   /**
@@ -154,23 +117,5 @@ export class Session
   public async pause(): Promise<boolean>
   {
     return this.audioManager.pause();
-  }
-
-  /**
-   * Checks if the bot is inactive
-   */
-  private async inactivityCheck()
-  {
-    if(this.checkingTimeout) return;
-    this.checkingTimeout = true;
-
-    await waitForMs(this.timeout);
-    if(this.queue.length() == 0)
-    {
-      this.tChannel.send("Left due to inactivity");
-      this.DJ.endSession(this);
-    }
-
-    this.checkingTimeout = false;
   }
 };

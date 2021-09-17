@@ -1,6 +1,7 @@
-import youtubedl, { YtResponse } from 'youtube-dl-exec';
-import { TrackInfo } from '../bot/Track';
 import { IFetchStrategy } from './IFetchStrategy';
+import { TrackInfo } from '../bot/Track';
+
+import youtubedl from 'youtube-dl-exec';
 
 export class YoutubeUrlFetchStrategy implements IFetchStrategy {
   constructor(){

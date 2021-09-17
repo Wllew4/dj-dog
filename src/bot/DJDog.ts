@@ -5,7 +5,6 @@ import {
   Client,
   Intents,
   StageChannel,
-  TextChannel,
   VoiceChannel
 } from 'discord.js';
 
@@ -47,10 +46,9 @@ export class DJDog
   /**
    * Finds a session by the voice channel associated with it
    * @param vChannel Voice channel associated with the session
-   * @param tChannel Text channel associated with the request
    * @returns A session based on the parameters given
    */
-  public getSession(vChannel: VoiceChannel | StageChannel, tChannel: TextChannel): Session
+  public getSession(vChannel: VoiceChannel | StageChannel): Session
   {
     for(let session of this.sessions)
     {
@@ -59,7 +57,7 @@ export class DJDog
         return session;
       }
     }
-    return this.sessions[this.sessions.push(new Session(this, vChannel, tChannel)) - 1];
+    return this.sessions[this.sessions.push(new Session(vChannel)) - 1];
   }
 
   /**
