@@ -8,12 +8,12 @@ import {
   VoiceConnectionStatus,
   VoiceConnection
 } from '@discordjs/voice';
+import { DJDog } from './DJDog';
 
 
 export class Session
 {
   private audioManager: AudioManager;
-
   private connection: VoiceConnection;
 
   private controller: AbortController;
@@ -23,7 +23,7 @@ export class Session
    * Starts a new session.
    * @param vChannel The voice channel associated with the session
    */
-  constructor(public vChannel: VoiceChannel | StageChannel)
+  constructor(public vChannel: VoiceChannel | StageChannel, public dj: DJDog)
   {
     this.connection = joinVoiceChannel({
       channelId: this.vChannel.id,
@@ -33,7 +33,7 @@ export class Session
       selfMute: false
     });
 
-    this.audioManager = new AudioManager();
+    this.audioManager = new AudioManager(this);
     this.connection.subscribe(this.audioManager.audioPlayer);
 
     this.controller = new AbortController();

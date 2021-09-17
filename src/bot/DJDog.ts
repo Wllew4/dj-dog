@@ -57,7 +57,7 @@ export class DJDog
         return session;
       }
     }
-    return this.sessions[this.sessions.push(new Session(vChannel)) - 1];
+    return this.sessions[this.sessions.push(new Session(vChannel, this)) - 1];
   }
 
   /**
