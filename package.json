@@ -24,6 +24,7 @@
     "@discordjs/voice": "^0.6.0",
     "discord-api-types": "^0.23.1",
     "discord.js": "^13.1.0",
+    "ffmpeg-stream": "^0.7.0",
     "install": "^0.13.0",
     "libsodium-wrappers": "^0.7.9",
     "npm": "^7.23.0",
