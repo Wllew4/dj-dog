@@ -25,6 +25,12 @@ export class Session
   private controller: AbortController;
   private signal: AbortSignal;
 
+  /**
+   * Starts a new session.
+   * @param DJ The DJDog instance that manages the session
+   * @param vChannel The voice channel associated with the session
+   * @param tChannel The text channel associated with the session
+   */
   constructor(private DJ: DJDog, public vChannel: VoiceChannel | StageChannel, private tChannel: TextChannel)
   {
     //30s of inactivity -> disconnect
@@ -47,6 +53,9 @@ export class Session
     this.signal = this.controller.signal;
   }
 
+  /**
+   * Connects the bot to its voice channel
+   */
   public async join()
   {
     try
@@ -61,6 +70,9 @@ export class Session
     }
   }
 
+  /**
+   * Disconnects the bot from its voice channel
+   */
   public async leave()
   {
     try
@@ -73,6 +85,10 @@ export class Session
     }
   }
 
+  /**
+   * Adds a song to the queue
+   * @param url The url of the song to queue up
+   */
   public async play(url: string)
   {
     this.queue.add(new Track(url));
@@ -95,6 +111,10 @@ export class Session
     }
   }
 
+  /**
+   * Gets a list of the queued up tracks
+   * @returns A string listing the queued up tracks
+   */
   public async showQueue(): Promise<string>
   {
     let o: string = `\`\`\`${this.queue.length()} items in queue:\n`;
@@ -106,6 +126,10 @@ export class Session
     return o;
   }
 
+  /**
+   * Skips the current song
+   * @returns true if there is another track, false if the queue is empty
+   */
   public async skip(): Promise<boolean>
   {
     const nextTrack = this.queue.get();
@@ -123,11 +147,18 @@ export class Session
     }
   }
 
+  /**
+   * Pauses/unpauses playback
+   * @returns true if paused, false if unpaused
+   */
   public async pause(): Promise<boolean>
   {
     return this.audioManager.pause();
   }
 
+  /**
+   * Checks if the bot is inactive
+   */
   private async inactivityCheck()
   {
     if(this.checkingTimeout) return;

@@ -5,7 +5,10 @@ import { GuildMember, Interaction, TextChannel } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
-
+/**
+ * Refreshes the / commands on a given DJDog instance
+ * @param this The owning DJDog object
+ */
 export async function refreshSlashCommands(this: DJDog)
 {
   const rest = new REST({ version: '9' }).setToken(this.token);
@@ -27,6 +30,10 @@ export async function refreshSlashCommands(this: DJDog)
   }
 }
 
+/**
+ * Constructs reponses to / commands
+ * @param this The owning DJDog object
+ */
 export async function createInteractions(this: DJDog)
 {
   this.client.on('interactionCreate', async (i: Interaction) =>
