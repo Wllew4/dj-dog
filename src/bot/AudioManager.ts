@@ -1,8 +1,8 @@
 import { waitForMs } from "../util/util";
 import { createReadStream } from 'fs';
-import { AudioPlayer, AudioResource, createAudioPlayer, createAudioResource, demuxProbe, NoSubscriberBehavior, StreamType, VoiceConnection } from "@discordjs/voice";
+import { AudioPlayer, AudioPlayerError, AudioResource, createAudioPlayer, createAudioResource, demuxProbe, NoSubscriberBehavior, StreamType, VoiceConnection } from "@discordjs/voice";
 import { TrackInfo } from "./Track";
-import ytdl from 'ytdl-core';
+import ytdl, { downloadOptions } from 'ytdl-core';
 
 
 export class AudioManager
@@ -36,44 +36,27 @@ export class AudioManager
     await waitForMs(trackInfo.duration * 1000);
   }
 
-  public async stream(url: string) {
+  public async stream(url: string, starttime=0) {
     try{
+      let dlOpts: downloadOptions = {
+        filter: 'audioonly',
+        highWaterMark: 16777216,
+        begin: starttime + 'ms'
+      };
       const basicInfo = await ytdl.getBasicInfo(url);
-      const str = ytdl(url, { filter: 'audioonly', highWaterMark:16777216});
-      const resource = createAudioResource(str, { inputType: StreamType.WebmOpus });
+      const resource = createAudioResource(ytdl(url, dlOpts), { inputType: StreamType.WebmOpus });
       this.audioPlayer.play(resource);
-      this.audioPlayer.on('error', error => {
-        console.error(error);
-        this.tryResuming();
+      this.audioPlayer.on('error', err => {
+        console.error(err);
+        if (err instanceof AudioPlayerError) this.stream(url, starttime + err.resource.playbackDuration);
       });
-      const msToWait = parseInt(basicInfo.videoDetails.lengthSeconds) * 1000;
+      const msToWait = parseInt(basicInfo.videoDetails.lengthSeconds) * 1000 - starttime;
       await waitForMs(msToWait);
     }
-    catch(e){
-      console.error(e);
-      this.tryResuming();
+    catch(err){
+      console.error(err);
+      if (err instanceof AudioPlayerError) this.stream(url, starttime + err.resource.playbackDuration);
     }
-  }
-
-  private tryResuming(){
-    // retry after 100ms
-
-    const max_retries = 20;
-    let retries = 0;
-    const retryInterval = setInterval(()=>{
-      retries++;
-      if(this.audioPlayer.unpause()){
-        clearInterval(retryInterval);
-        console.log(`Resumed playback after ${retries} retries.`);
-        return;
-      } else {
-        if (retries>=max_retries){
-          clearInterval(retryInterval);
-          console.log(`Failed resuming playback after ${retries} retries.`);
-          return;
-        }
-      };
-    },100);
   }
 
   public pause(): boolean
