@@ -103,7 +103,7 @@ export class Session
    */
   public async skip(): Promise<boolean>
   {
-    this.audioManager.audioPlayer.stop()
+    this.audioManager.audioPlayer.stop();
     if(this.audioManager.queue.length() == 0)
       return false;
     else

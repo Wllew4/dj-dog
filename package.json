@@ -27,7 +27,7 @@
     "ffmpeg-stream": "^0.7.0",
     "install": "^0.13.0",
     "libsodium-wrappers": "^0.7.9",
-    "npm": "^7.23.0",
+    "node-fetch": "^3.0.0",
     "opusscript": "^0.0.8",
     "tweetnacl": "^1.0.3",
     "youtube-dl-exec": "^1.2.6"
