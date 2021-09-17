@@ -34,11 +34,13 @@ export class Session
     this.connection = joinVoiceChannel({
       channelId: this.vChannel.id,
       guildId: this.vChannel.guild.id,
-      adapterCreator: this.vChannel.guild.voiceAdapterCreator
+      adapterCreator: this.vChannel.guild.voiceAdapterCreator,
+      selfDeaf: false,
+      selfMute: false
     });
 
     this.queue = new Queue<Track>();
-    this.audioManager = new AudioManager(this.connection);
+    this.audioManager = new AudioManager();
     this.connection.subscribe(this.audioManager.audioPlayer);
 
     this.controller = new AbortController();
@@ -81,7 +83,8 @@ export class Session
         const nextTrack = this.queue.get();
         if(nextTrack)
         {
-          await this.audioManager.play(await nextTrack.trackInfo);
+          // await this.audioManager.play(await nextTrack.trackInfo);
+          await this.audioManager.stream(nextTrack.url);
         }
         else
           console.error('ERROR: Queue length is 1 but couldn\'t get song??');
@@ -110,7 +113,8 @@ export class Session
     this.inactivityCheck();
     if(nextTrack)
     {
-      this.audioManager.play(await nextTrack.trackInfo);
+      // this.audioManager.play(await nextTrack.trackInfo);
+      await this.audioManager.stream(nextTrack.url);
       return true;
     }
     else

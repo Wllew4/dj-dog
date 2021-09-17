@@ -29,7 +29,7 @@
     "npm": "^7.23.0",
     "opusscript": "^0.0.8",
     "tweetnacl": "^1.0.3",
-    "youtube-audio-stream": "^0.3.17",
-    "youtube-dl-exec": "^1.2.6"
+    "youtube-dl-exec": "^1.2.6",
+    "ytdl-core": "^4.9.1"
   }
 }

@@ -24,7 +24,10 @@ export class YoutubeUrlFetchStrategy implements IFetchStrategy {
 
   async fetch(url: string): Promise<TrackInfo> {
     // return filename once download is ready
-    const [trackInfo] = await Promise.all([this.getTrackInfo(url),this.download(url)]);
-    return trackInfo;
+    // const [trackInfo] = await Promise.all([this.getTrackInfo(url),this.download(url)]);
+    return {
+      duration:0,
+      path:''
+    };
   }
 }
