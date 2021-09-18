@@ -25,23 +25,13 @@ jobs:
         cd $GITHUB_WORKSPACE
         ./node_modules/.bin/tsc -p tsconfig.json
         cp app.yaml build/app.yaml
-
-  install_gcloud:
-    name: Install gcloud CLI
-    runs-on: ubuntu-latest
-    steps:
-    - uses: google-github-actions/setup-gcloud@master
+    - name: Install gcloud CLI
+      uses: google-github-actions/setup-gcloud@master
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         service_account_key: ${{ secrets.GCP_SA_KEY }}
         export_default_credentials: true
-
-  deploy:
-    name: Deploy App Engine
-    runs-on: ubuntu-latest
-    needs: [build, install_gcloud]
-    steps:
-      - name: Deploy glcoud app engine
-        run: |
-          cd $GITHUB_WORKSPACE/build
-          gcloud app deploy
+    - name: Deploy glcoud App Engine
+      run: |
+        cd $GITHUB_WORKSPACE/build
+        gcloud app deploy
