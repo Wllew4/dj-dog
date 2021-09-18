@@ -34,4 +34,4 @@ jobs:
     - name: Deploy glcoud App Engine
       run: |
         cd $GITHUB_WORKSPACE/build
-        gcloud app deploy
+        gcloud app deploy --quiet
