@@ -23,12 +23,12 @@ class Search{
   }
 
   static isValidUrl (url: string): boolean {
-    return (
-      url.startsWith('https://') ||
-      url.startsWith('http://') ||
-      url.startsWith('www.youtube.com/') ||
-      url.startsWith('youtube.be/')
-    );
+    try {
+      new URL(url);
+    } catch (err) {
+      return false;
+    } 
+    return true;
   }
 }
 
