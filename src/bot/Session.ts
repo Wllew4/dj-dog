@@ -9,7 +9,7 @@ import {
   VoiceConnection
 } from '@discordjs/voice';
 import { DJDog } from './DJDog';
-import Search from './Search';
+import SearchManager from './SearchManager';
 
 
 export class Session
@@ -78,8 +78,8 @@ export class Session
    */
   public async play(url: string)
   {
-    if (Search.isValidUrl(url)) this.audioManager.queue.add(new Track(url));
-    else this.audioManager.queue.add(new Track(await Search.search(url)));
+    if (SearchManager.isValidUrl(url)) this.audioManager.queue.add(new Track(url));
+    else this.audioManager.queue.add(new Track(await SearchManager.search(url)));
     this.audioManager.checkQueue();
   }
 
