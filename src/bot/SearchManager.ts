@@ -1,8 +1,8 @@
 // activate api & get key from https://console.cloud.google.com/apis/library/youtube.googleapis.com
-import { youtube_api_key } from '../confidential.json';
+import { youtube_api_key } from '../confidential';
 import fetch from 'cross-fetch';
 
-class Search{
+class SearchManager{
   static async search (query: string): Promise<string> {
     const res = await fetch(`//www.googleapis.com/youtube/v3/search?key=${youtube_api_key}&q=${query}&maxResults=1&type=video&videoCategoryId=10`, { method: 'GET' });
 
@@ -32,4 +32,4 @@ class Search{
   }
 }
 
-export default Search;
+export default SearchManager;
