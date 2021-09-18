@@ -22,12 +22,12 @@
     "@discordjs/builders": "^0.6.0",
     "@discordjs/rest": "^0.1.0-canary.0",
     "@discordjs/voice": "^0.6.0",
+    "cross-fetch": "^3.1.4",
     "discord-api-types": "^0.23.1",
     "discord.js": "^13.1.0",
     "ffmpeg-stream": "^0.7.0",
     "install": "^0.13.0",
     "libsodium-wrappers": "^0.7.9",
-    "node-fetch": "^3.0.0",
     "opusscript": "^0.0.8",
     "tweetnacl": "^1.0.3",
     "youtube-dl-exec": "^1.2.6"
