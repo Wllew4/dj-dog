@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - run: |
+        cd $GITHUB_WORKSPACE/src
+        mv confidentialTemplate.json confidential.json
     - name: Install node
       uses: actions/setup-node@v2
       with:
