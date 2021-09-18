@@ -24,7 +24,7 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE
         ./node_modules/.bin/tsc -p tsconfig.json
-        cp app.yaml /build
+        cp app.yaml build/app.yaml
 
   install_gcloud:
     name: Install gcloud CLI
