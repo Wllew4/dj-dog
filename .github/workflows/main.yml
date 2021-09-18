@@ -1,0 +1,57 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+jobs:
+  checkout: # Checks-out repository under $GITHUB_WORKSPACE
+    name: Check out repository
+    runs-on: ubuntu-latest
+    steps: 
+    - uses: actions/checkout@v2
+
+  install_node:
+    name: Install node
+    runs-on: ubuntu-latest
+    steps:
+    - id: node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+        cache: 'npm'
+
+  install_gcloud:
+    name: Install gcloud CLI
+    runs-on: ubuntu-latest
+    steps:
+    - uses: google-github-actions/setup-gcloud@master
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+  build:
+    name: Install dependencies & compile typescript
+    runs-on: ubuntu-latest
+    needs: [checkout, install_node]
+    steps:
+    - id: install dependencies
+      run: npm ci
+    - id: compile
+      name: Compile typescript
+      run: |
+        cd $GITHUB_WORKSPACE
+        ./node_modules/.bin/tsc -p tsconfig.json
+        cp app.yaml /build
+
+  deploy:
+    name: Deploy AppEngine
+    runs-on: ubuntu-latest
+    needs: [build, install_gcloud]
+    steps:
+      - id: deploy
+        run: |
+          cd $GITHUB_WORKSPACE/build
+          gcloud app deploy
