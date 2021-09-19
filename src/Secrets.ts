@@ -16,7 +16,7 @@ class Secrets {
       const client = new SecretManagerServiceClient();
       try {
         const [accessResponse] = await client.accessSecretVersion({
-          name: `projects/1061050247606/secrets/confidential`,
+          name: `projects/1061050247606/secrets/confidential/versions/`,
         });
         //@ts-expect-error
         const responsePayload = accessResponse.payload.data.toString('utf8');
