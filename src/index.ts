@@ -1,4 +1,6 @@
 import { DJDog } from './bot/DJDog';
-import { token, client_id } from './confidential';
+import Secrets from './Secrets';
 
-const bot = new DJDog(token, client_id);
+Secrets.getSecrets().then((s) => {
+  new DJDog(s.token, s.client_id);
+});

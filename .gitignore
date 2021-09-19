@@ -2,15 +2,13 @@
 node_modules
 
 #Build
-build
-
-#Secrets
-token.json
+/build
 
 #Music downloads, todo: have its own folder
 *.mp3
 *.m4a
 *.opus
 *.mp4
+
 #Bot token
 src/confidential.json

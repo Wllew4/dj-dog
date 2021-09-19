@@ -1,9 +1,10 @@
 // activate api & get key from https://console.cloud.google.com/apis/library/youtube.googleapis.com
-import { youtube_api_key } from '../confidential';
+import Secrets from '../Secrets';
 import fetch from 'cross-fetch';
 
 class SearchManager{
   static async search (query: string): Promise<string> {
+    const { youtube_api_key } = await Secrets.getSecrets();
     const res = await fetch(`//www.googleapis.com/youtube/v3/search?key=${youtube_api_key}&q=${query}&maxResults=1&type=video&videoCategoryId=10`, { method: 'GET' });
 
     if (!res.ok) {

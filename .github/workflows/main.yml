@@ -24,7 +24,6 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE
         ./node_modules/.bin/tsc -p tsconfig.json
-        cp app.yaml build/app.yaml
     - name: Install gcloud CLI
       uses: google-github-actions/setup-gcloud@master
       with:
@@ -33,5 +32,5 @@ jobs:
         export_default_credentials: true
     - name: Deploy glcoud App Engine
       run: |
-        cd $GITHUB_WORKSPACE/build
+        cd $GITHUB_WORKSPACE
         gcloud app deploy --quiet
