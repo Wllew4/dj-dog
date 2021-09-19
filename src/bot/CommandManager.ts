@@ -1,5 +1,5 @@
 import { DJDog } from './DJDog';
-import commands from './commands.json';
+import fs from 'fs/promises';
 
 import { GuildMember, Interaction, TextChannel } from 'discord.js';
 import { REST } from '@discordjs/rest';
@@ -15,6 +15,7 @@ export async function refreshSlashCommands(this: DJDog)
 
   try
   {
+    const commands = require('./commands.json');
     await rest.put(
       //DEBUG
       //Change to applicationCommands for release

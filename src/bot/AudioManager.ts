@@ -82,7 +82,12 @@ export class AudioManager
     try{
       // set up ffmpeg
       const converter = new Converter();
-      const output = converter.createOutputStream({f:'opus', acodec: 'libopus', b: 128000, application:'audio' });
+      const output = converter.createOutputStream({
+        f:'opus',
+        acodec: 'libopus',
+        b: 128000,
+        application:'audio'
+      });
 
       // download video & convert
       const subProcess = youtubedlraw(url, {f:'bestaudio', o:'-'});
