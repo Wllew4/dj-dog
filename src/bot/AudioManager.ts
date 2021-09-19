@@ -82,11 +82,11 @@ export class AudioManager
     try{
       // set up ffmpeg
       const converter = new Converter();
-      const input = converter.createInputStream({});
-      const output = converter.createOutputStream({f: "opus", b: '192000'});
+      const output = converter.createOutputStream({f:'opus', acodec: 'libopus', b: 128000, application:'audio' });
 
       // download video & convert
-      youtubedlraw(url, {f:'bestaudio', o:'-'}).stdout?.pipe(input);
+      const subProcess = youtubedlraw(url, {f:'bestaudio', o:'-'});
+      subProcess.stdout?.pipe(converter.createInputStream({}));
       converter.run();
 
       // Discord stuff
