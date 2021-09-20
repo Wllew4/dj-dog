@@ -1,10 +1,8 @@
 import { DJDog } from './bot/DJDog';
 import Secrets from './Secrets';
 import express from 'express';
-import youtubedl from 'youtube-dl-exec';
-import { exec } from 'child_process';
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 80;
 const app = express();
 app.set('trust proxy', true);
 app.listen(port);

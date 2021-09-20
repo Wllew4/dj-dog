@@ -15,7 +15,7 @@ export async function refreshSlashCommands(this: DJDog)
 
   try
   {
-    const commands = require('./commands.json');
+    const commands = require('../../commands.json');
     await rest.put(
       //DEBUG
       //Change to applicationCommands for release

@@ -9,17 +9,17 @@ class Secrets {
   };
   static async getSecrets () {
     try {
-      this.secrets = require('./confidential.json');
+      this.secrets = require('../confidential.json');
     } catch (error) {
       console.error(error);
       console.log("confidential.json not found, checking gcp secret...");
       const client = new SecretManagerServiceClient();
       try {
-        const [accessResponse] = await client.accessSecretVersion({
-          name: `projects/1061050247606/secrets/confidential/versions/`,
+        const [secret] = await client.accessSecretVersion({
+          name: `projects/1061050247606/secrets/confidential/versions/latest`,
         });
         //@ts-expect-error
-        const responsePayload = accessResponse.payload.data.toString('utf8');
+        const responsePayload = secret.payload.data.toString('utf8');
         this.secrets = JSON.parse(responsePayload);
       } catch (error) {
         console.error("Could not get secret from gcp");

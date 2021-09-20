@@ -11,4 +11,4 @@ node_modules
 *.mp4
 
 #Bot token
-src/confidential.json
+confidential.json
