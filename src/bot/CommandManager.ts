@@ -1,5 +1,4 @@
 import { DJDog } from './DJDog';
-import fs from 'fs/promises';
 
 import { GuildMember, Interaction, TextChannel } from 'discord.js';
 import { REST } from '@discordjs/rest';
@@ -11,18 +10,24 @@ import { Routes } from 'discord-api-types/v9';
  */
 export async function refreshSlashCommands(this: DJDog)
 {
-  const rest = new REST({ version: '9' }).setToken(this.token);
+  const rest = new REST({ version: '9' }).setToken(this.secrets.token);
 
   try
   {
     const commands = require('../../commands.json');
-    await rest.put(
-      //DEBUG
-      //Change to applicationCommands for release
-      Routes.applicationCommands(
-        this.client_id,
-      ),
-      { body: commands });
+    if(this.secrets.debug)
+      await rest.put(
+        Routes.applicationGuildCommands(
+          this.secrets.client_id,
+          this.secrets.guild_id
+        ),
+        { body: commands });
+    else
+      await rest.put(
+        Routes.applicationCommands(
+          this.secrets.client_id,
+        ),
+        { body: commands });
   }
   catch (e)
   {

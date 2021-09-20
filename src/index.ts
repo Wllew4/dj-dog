@@ -10,7 +10,7 @@ app.listen(port);
 let djDog: DJDog;
 
 Secrets.getSecrets().then((s) => {
-  djDog = new DJDog(s.token, s.client_id);
+  djDog = new DJDog(s);
 });
 
 app.get('/', async (req, res) => {
