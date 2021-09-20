@@ -1,12 +1,16 @@
 import {SecretManagerServiceClient} from '@google-cloud/secret-manager';
 
+export interface secret {
+  debug:"",
+  token:"",
+  client_id:"",
+  guild_id:"",
+  youtube_api_key:""
+};
+
 class Secrets {
-  private static secrets = {
-    token:"",
-    client_id:"",
-    guild_id:"",
-    youtube_api_key:""
-  };
+  private static secrets: secret;
+
   static async getSecrets () {
     try {
       this.secrets = require('../confidential.json');

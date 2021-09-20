@@ -1,5 +1,6 @@
 import { refreshSlashCommands, createInteractions } from './CommandManager';
 import { Session } from './Session';
+import { secret } from '../Secrets';
 
 import {
   Client,
@@ -20,10 +21,9 @@ export class DJDog
 
   /**
    * Bot class, initializes commands and manages sessions.
-   * @param token bot token, stored in confidential.json
-   * @param client_id client id, stored in confidential.json
+   * @param secrets the contents of confidential.json
    */
-  public constructor(protected token: string, protected client_id: string)
+  public constructor(protected secrets: secret)
   {
     this.client = new Client({
       intents: [
@@ -37,7 +37,7 @@ export class DJDog
 
     this.sessions = [];
 
-    this.client.login(this.token);
+    this.client.login(this.secrets.token);
     this.client.on('ready', () => {
       console.log('Ready!!');
     });
