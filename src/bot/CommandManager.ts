@@ -19,9 +19,8 @@ export async function refreshSlashCommands(this: DJDog)
     await rest.put(
       //DEBUG
       //Change to applicationCommands for release
-      Routes.applicationGuildCommands(
+      Routes.applicationCommands(
         this.client_id,
-        '887541961161080883'
       ),
       { body: commands });
   }
