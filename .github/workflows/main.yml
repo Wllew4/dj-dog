@@ -42,7 +42,6 @@ jobs:
         gcloud compute scp package-lock.json $G_USR:app --compress
         gcloud compute scp tsconfig.json $G_USR:app --compress
         gcloud compute scp deploy.sh $G_USR:app --compress
-        gcloud compute scp start.sh $G_USR:app --compress
     # - name: Deploy glcoud App Engine
     #   run: |
     #     cd $GITHUB_WORKSPACE
