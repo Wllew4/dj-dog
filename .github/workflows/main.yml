@@ -12,20 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    # - run: |
-    #     cd $GITHUB_WORKSPACE/src
-    #     mv confidentialTemplate.json confidential.json
-    # - name: Install node
-    #   uses: actions/setup-node@v2
-    #   with:
-    #     node-version: '16'
-    #     cache: 'npm'
-    # - name: Install dependencies
-    #   run: npm ci
-    # - name: Compile typescript
-    #   run: |
-    #     cd $GITHUB_WORKSPACE
-    #     ./node_modules/.bin/tsc -p tsconfig.json
     - name: Install gcloud CLI
       uses: google-github-actions/setup-gcloud@master
       with:
@@ -42,9 +28,8 @@ jobs:
         gcloud compute scp package-lock.json $G_USR:app --compress
         gcloud compute scp tsconfig.json $G_USR:app --compress
         gcloud compute scp deploy.sh $G_USR:app --compress
-    # - name: Deploy glcoud App Engine
-    #   run: |
-    #     cd $GITHUB_WORKSPACE
-    #     gcloud app deploy --quiet
     - name: SSH build
       run: gcloud compute ssh $G_USR --command="sh app/deploy.sh"
+    - name: SSH restart node
+      run: |
+        gcloud compute ssh $G_USR --command="pm2 restart 0"
