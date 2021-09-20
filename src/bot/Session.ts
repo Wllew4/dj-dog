@@ -1,5 +1,6 @@
 import { AudioManager } from './AudioManager';
 import { Track } from './Track';
+import SearchManager from './SearchManager';
 
 import { StageChannel, VoiceChannel } from 'discord.js';
 import {
@@ -9,7 +10,6 @@ import {
   VoiceConnection
 } from '@discordjs/voice';
 import { DJDog } from './DJDog';
-import SearchManager from './SearchManager';
 
 
 export class Session
