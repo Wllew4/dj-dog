@@ -36,7 +36,7 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE
         gcloud config set compute/zone us-east1-d
-        gcloud compute scp /src $G_USR:app --compress --recurse
+        gcloud compute scp src $G_USR:app --compress --recurse
         gcloud compute scp commands.json $G_USR:app --compress
         gcloud compute scp package.json $G_USR:app --compress
         gcloud compute scp package-lock.json $G_USR:app --compress
