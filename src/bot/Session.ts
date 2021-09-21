@@ -1,5 +1,5 @@
 import { AudioManager } from './AudioManager';
-import { Track } from './Track';
+import Track from './Track';
 import SearchManager from './SearchManager';
 
 import { StageChannel, VoiceChannel } from 'discord.js';
@@ -10,6 +10,7 @@ import {
   VoiceConnection
 } from '@discordjs/voice';
 import { DJDog } from './DJDog';
+import ReplyVM from './ReplyVM';
 
 
 export class Session
@@ -19,6 +20,8 @@ export class Session
 
   private controller: AbortController;
   private signal: AbortSignal;
+  //Viewmodel for the "Currently playing" reply message
+  public replyVM?: ReplyVM;
 
   /**
    * Starts a new session.
@@ -74,20 +77,23 @@ export class Session
 
   /**
    * Adds a song to the queue
-   * @param url The url of the song to queue up
+   * @param query The url/query for the song to queue up
    */
-  public async play(url: string)
+  public async play(query: string): Promise<Track>
   {
-    if (SearchManager.isValidUrl(url)) this.audioManager.queue.add(new Track(url));
-    else this.audioManager.queue.add(new Track(await SearchManager.search(url)));
+    let track: Track;
+    if (SearchManager.isValidUrl(query)) track = new Track(query);
+    else track = new Track(await SearchManager.search(query));
+    this.audioManager.queue.add(track);
     this.audioManager.checkQueue();
+    return track;
   }
 
   /**
    * Gets a list of the queued up tracks
-   * @returns A string listing the queued up tracks
+   * @returns The queued up tracks
    */
-  public async showQueue(): Promise<string>
+  public showQueue(): string
   {
     const queue = this.audioManager.queue;
     let o: string = `\`\`\`${queue.length()} items in queue:\n`;

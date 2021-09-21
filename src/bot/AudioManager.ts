@@ -1,4 +1,4 @@
-import { Track } from './Track';
+import Track from './Track';
 import { Session } from './Session';
 import { Queue, waitForMs } from "../util/util";
 
@@ -11,6 +11,8 @@ import {
   StreamType } from '@discordjs/voice';
 import youtubedl, { raw as youtubedlraw } from 'youtube-dl-exec';
 import { Converter } from 'ffmpeg-stream';
+import { ExecaChildProcess } from 'execa';
+import { Readable } from 'stream';
 
 export class AudioManager
 {
@@ -20,7 +22,7 @@ export class AudioManager
   public audioPlayer: AudioPlayer;
   public queue: Queue<Track>;
   
-  private paused: boolean;
+  private paused: boolean = false;
 
   /**
    * Constructs a new AudioManager object
@@ -28,7 +30,6 @@ export class AudioManager
    */
   public constructor(private session: Session)
   {
-    this.paused = false;
     this.queue = new Queue<Track>();
     this.timeout = setTimeout(()=>{},0);
     this.startTimeout();
@@ -36,6 +37,7 @@ export class AudioManager
     this.audioPlayer = createAudioPlayer({	behaviors: {
       noSubscriber: NoSubscriberBehavior.Pause,
     }});
+    this.audioPlayer.on('error', console.error );
 
     this.audioPlayer.on('stateChange', (oldState, newState) => {
       if(newState.status == AudioPlayerStatus.Idle && oldState.status != AudioPlayerStatus.Idle)
@@ -56,6 +58,24 @@ export class AudioManager
   }
 
   /**
+   * Prepares a new converter
+   * @param ytdl The incoming audio/video stream
+   * @returns The converted audio stream
+   */
+  convert(mediaStream:Readable): Readable {
+    const converter = new Converter();
+    const output = converter.createOutputStream({
+      f:'opus',
+      acodec: 'libopus',
+      b: 128000,
+      application:'audio'
+    });
+    mediaStream.pipe(converter.createInputStream({}));
+    converter.run();
+    return output;
+  }
+
+  /**
    * Checks if there's a new song to start streaming
    */
   public async checkQueue()
@@ -69,7 +89,6 @@ export class AudioManager
     if(this.queue.length() == 0)
     //queue is empty
       return;
-    
     this.stream();
   }
 
@@ -78,31 +97,24 @@ export class AudioManager
    */
   public async stream() {
     clearTimeout(this.timeout);
-    const url = this.queue.get().url;
+    const track = this.queue.get();
+    track.info.then(()=>{
+      if (this.session.replyVM) {
+        this.session.replyVM.track = track;
+      }
+    });
+
     try{
-      // set up ffmpeg
-      const converter = new Converter();
-      const output = converter.createOutputStream({
-        f:'opus',
-        acodec: 'libopus',
-        b: 128000,
-        application:'audio'
-      });
-
-      // download video & convert
-      const subProcess = youtubedlraw(url, {f:'bestaudio', o:'-'});
-      subProcess.stdout?.pipe(converter.createInputStream({}));
-      converter.run();
-
-      // Discord stuff
-      const resource = createAudioResource(output, { inputType: StreamType.OggOpus });
+      // if audio-only formats are offered, download the highest quality one
+      // else fall back to the worst video+audio format
+      // output to process stdout so we can stream this
+      const downloader = youtubedlraw(track.url, {f:'bestaudio/worst', o:'-'});
+      if (!downloader.stdout) throw Error('Download process has no stdout???');
+      // no joke, downloader will quit if nobody listens to its errors :(
+      downloader.stderr?.on('data', ()=>{/* cool story bro */});
+      const audioStream = this.convert(downloader.stdout);
+      const resource = createAudioResource(audioStream, { inputType: StreamType.OggOpus });
       this.audioPlayer.play(resource);
-      this.audioPlayer.on('error', console.error );
-
-      // resolve promise when song is done
-      const { duration } = await youtubedl(url, { dumpSingleJson:true });
-      await waitForMs(duration * 1000);
-      converter.kill();
     }
     catch(err){
       console.error(err);
@@ -146,3 +158,4 @@ export class AudioManager
   //   await waitForMs(trackInfo.duration * 1000);
   // }
 };
+

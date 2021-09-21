@@ -1,16 +1,9 @@
 import { unlink } from 'fs';
-import { Fetcher, YoutubeUrlFetchStrategy } from '../fetcher/Fetcher';
-
-
-interface TrackInfo{
-    path: string,
-    duration: number
-}
+import youtubedl, { YtResponse } from 'youtube-dl-exec';
 
 class Track
 {
-  public trackInfo: Promise<TrackInfo>;
-
+  public readonly info: Promise<YtResponse>;
   /**
    * Constructs a new track
    * @param url The song's url
@@ -19,28 +12,8 @@ class Track
     public url: string
   )
   {
-    this.trackInfo = this.download();
-  }
-
-  /**
-   * Downloads the track
-   * @returns TrackInfo object including a filepath and song duration
-   */
-  private async download(): Promise<TrackInfo>
-  {
-    const fetcher = new Fetcher(new YoutubeUrlFetchStrategy());
-    return fetcher.fetch(this.url);
-  }
-
-  /**
-   * Deletes the audio file for this track
-   */
-  public async delete()
-  {
-    unlink((await this.trackInfo).path, e => {
-      if(e) console.error(e);
-    });
+    this.info = youtubedl(this.url, { dumpSingleJson:true });
   }
 };
 
-export { Track, TrackInfo };
+export default Track;

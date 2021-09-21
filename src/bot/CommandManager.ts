@@ -1,8 +1,9 @@
 import { DJDog } from './DJDog';
 
-import { GuildMember, Interaction, TextChannel } from 'discord.js';
+import { GuildMember, Interaction, Message, TextChannel } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
+import ReplyVM from './ReplyVM';
 
 /**
  * Refreshes the / commands on a given DJDog instance
@@ -74,6 +75,7 @@ export async function createInteractions(this: DJDog)
     case 'join':
       session.join();
       i.reply(`Joining voice channel: ${i.member.voice.channel.name}`);
+      if (!session.replyVM) this.linkVM(session, i.fetchReply());
       return;
 
     case 'leave':
@@ -84,10 +86,12 @@ export async function createInteractions(this: DJDog)
     case 'play':
       session.play(i.options.getString('song', true));
       i.reply(`Added ${i.options.getString("song", true)} to the queue.`);
+      if (!session.replyVM) this.linkVM(session, i.fetchReply());
       return;
 
     case 'queue':
-      i.reply( await session.showQueue());
+      const queue = session.showQueue();
+      i.reply(queue);
       return;
 
     case 'skip':

@@ -5,7 +5,7 @@ import fetch from 'cross-fetch';
 class SearchManager{
   static async search (query: string): Promise<string> {
     const { youtube_api_key } = await Secrets.getSecrets();
-    const res = await fetch(`//www.googleapis.com/youtube/v3/search?key=${youtube_api_key}&q=${query}&maxResults=1&type=video&videoCategoryId=10`, { method: 'GET' });
+    const res = await fetch(`//www.googleapis.com/youtube/v3/search?key=${youtube_api_key}&q=${query}&maxResults=1&type=video&videoCategoryId=10&safeSearch=none`, { method: 'GET' });
 
     if (!res.ok) {
       console.error(res);

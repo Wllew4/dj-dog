@@ -5,13 +5,22 @@ import { secret } from '../Secrets';
 import {
   Client,
   Intents,
+  Message,
   StageChannel,
   VoiceChannel
 } from 'discord.js';
+import { APIMessage } from 'discord.js/node_modules/discord-api-types';
+import ReplyVM from './ReplyVM';
 
 
 export class DJDog
 {
+  async linkVM(session: Session, pReply: Promise<Message|APIMessage>) {
+    const reply = await pReply;
+    if (reply instanceof Message) {
+      session.replyVM = new ReplyVM(reply);
+    }
+  }
   protected client: Client;
   private sessions: Session[];
 
