@@ -67,6 +67,7 @@ export class Session
   {
     try
     {
+      this.audioManager.stop();
       this.connection.destroy();
     }
     catch (e)
@@ -111,11 +112,7 @@ export class Session
    */
   public async skip(): Promise<boolean>
   {
-    this.audioManager.audioPlayer.stop();
-    if(this.audioManager.queue.length() == 0)
-      return false;
-    else
-      return true;
+    return await this.audioManager.stop();
   }
 
   /**

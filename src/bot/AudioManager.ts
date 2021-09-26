@@ -9,7 +9,7 @@ import {
   createAudioResource,
   NoSubscriberBehavior,
   StreamType } from '@discordjs/voice';
-import youtubedl, { raw as youtubedlraw } from 'youtube-dl-exec';
+import { raw as youtubedlraw } from 'youtube-dl-exec';
 import { Converter } from 'ffmpeg-stream';
 import { ExecaChildProcess } from 'execa';
 import { Readable } from 'stream';
@@ -19,6 +19,7 @@ export class AudioManager
   private timeoutTime: number = 60;
   private timeout: NodeJS.Timeout;
 
+  private downloader?: ExecaChildProcess;
   public audioPlayer: AudioPlayer;
   public queue: Queue<Track>;
   
@@ -46,7 +47,7 @@ export class AudioManager
         this.startTimeout();
         this.queue.advance();
         this.checkQueue();
-      }
+      } 
     });
   }
 
@@ -108,11 +109,11 @@ export class AudioManager
       // if audio-only formats are offered, download the highest quality one
       // else fall back to the worst video+audio format
       // output to process stdout so we can stream this
-      const downloader = youtubedlraw(track.url, {f:'bestaudio/worst', o:'-'});
-      if (!downloader.stdout) throw Error('Download process has no stdout???');
+      this.downloader = youtubedlraw(track.url, {f:'bestaudio/worst', o:'-'});
+      if (!this.downloader.stdout) throw Error('Download process has no stdout???');
       // no joke, downloader will quit if nobody listens to its errors :(
-      downloader.stderr?.on('data', ()=>{/* cool story bro */});
-      const audioStream = this.convert(downloader.stdout);
+      this.downloader.stderr?.on('data', ()=>{/* cool story bro */});
+      const audioStream = this.convert(this.downloader.stdout);
       const resource = createAudioResource(audioStream, { inputType: StreamType.OggOpus });
       this.audioPlayer.play(resource);
     }
@@ -139,6 +140,26 @@ export class AudioManager
     }
     return this.paused;
   }
+
+  private killDownloader(): void {
+    if (this.downloader && !this.downloader.killed) {
+      this.downloader.kill('SIGTERM');
+    }
+  }
+
+  /**
+   * Stops playback
+   * @returns true if there is another track, false if the queue is empty
+   */
+  public async stop(): Promise<boolean> {
+    this.audioPlayer.stop();
+    this.killDownloader();
+    if(this.queue.length() == 0)
+      return false;
+    else
+      return true;
+  }
+
 
   /**
    * Functions below were for the download strategy, now deprecated.
