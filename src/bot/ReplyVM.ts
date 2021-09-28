@@ -24,7 +24,8 @@ class ReplyVM {
   private async render(): Promise<void>{
     if (this._track){
       const info = await this._track.info;
-      const thumb = info.thumbnails[0];
+      let thumb = null;
+      if (info.thumbnail) thumb = info.thumbnails[0];
       this._replyMessage.edit({
         content: this._isPlaying ? `⯈ Playing` : '▎ ▎ Paused',
         embeds: [
@@ -34,18 +35,18 @@ class ReplyVM {
               url: info.channel_url
             },
             title: info.title,
-            url: info.url,
-            thumbnail:{
+            url: info.webpage_url,
+            thumbnail:thumb ? {
               url: thumb.url,
               width: thumb.width,
               height: thumb.height
-            },
+            } : undefined,
             color:'LUMINOUS_VIVID_PINK',
-            description:info.is_live ? '🔴 LIVE' : `${new Date(info.duration*1000).toISOString().slice(11,19)}`,
-            footer:{
-              text: `${'Foshka#0001'}`,
-              iconURL: 'https://cdn.discordapp.com/avatars/124131215547695104/73bd451ab76416e584b316b35c37eb8c.webp?size=128'
-            },
+            description:info.is_live !== undefined && info.is_live || info.duration === undefined ? '🔴 LIVE' : `${new Date(info.duration*1000).toISOString().slice(11,19)}`,
+            // footer:{
+            //   text: `${'Foshka#0001'}`,
+            //   iconURL: 'https://cdn.discordapp.com/avatars/124131215547695104/73bd451ab76416e584b316b35c37eb8c.webp?size=128'
+            // },
             timestamp:Date.now()
           }
         ]

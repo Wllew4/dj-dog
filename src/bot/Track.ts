@@ -12,7 +12,7 @@ class Track
     public url: string
   )
   {
-    this.info = youtubedl(this.url, { dumpSingleJson:true });
+    this.info = youtubedl(this.url, { dumpSingleJson:true, noCheckCertificate:true, noCallHome:true });
   }
 };
 
