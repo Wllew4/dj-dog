@@ -1,7 +1,7 @@
 {
-  "debug": "",
-  "token":"",
-  "client_id":"",
-  "guild_id":"",
-  "youtube_api_key":""
+	"debug": "",
+	"token":"",
+	"client_id":"",
+	"guild_id":"",
+	"youtube_api_key":""
 }

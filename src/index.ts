@@ -4,5 +4,5 @@ import Secrets from './Secrets';
 let djDog: DJDog;
 
 Secrets.getSecrets().then((s) => {
-  djDog = new DJDog(s);
+	djDog = new DJDog(s);
 });
