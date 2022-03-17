@@ -1,9 +1,8 @@
 import { DJDog } from './DJDog';
 
-import { GuildMember, Interaction, Message, TextChannel } from 'discord.js';
+import { GuildMember, Interaction, TextChannel } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
-import ReplyVM from './ReplyVM';
 
 /**
  * Refreshes the / commands on a given DJDog instance

@@ -1,4 +1,3 @@
-import { unlink } from 'fs';
 import youtubedl, { YtResponse } from 'youtube-dl-exec';
 
 class Track

@@ -1,6 +1,6 @@
 import Track from './Track';
 import { Session } from './Session';
-import { Queue, waitForMs } from "../util/util";
+import { Queue } from "../util/util";
 
 import {
 	AudioPlayer,
@@ -38,6 +38,7 @@ export class AudioManager
 		this.audioPlayer = createAudioPlayer({	behaviors: {
 			noSubscriber: NoSubscriberBehavior.Pause,
 		}});
+		
 		this.audioPlayer.on('error', console.error );
 
 		this.audioPlayer.on('stateChange', (oldState, newState) => {
