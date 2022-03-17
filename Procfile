@@ -1,2 +1,1 @@
-release: npm run tsc && sudo apt install ffmpeg
-web: node build/index.js
+web: npm run tsc && sudo apt install ffmpeg && node build/index.js
