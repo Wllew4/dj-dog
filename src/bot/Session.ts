@@ -1,8 +1,12 @@
-import { AudioManager } from './AudioManager';
+import AudioManager from './AudioManager';
 import Track from './Track';
 import SearchManager from './SearchManager';
 
-import { StageChannel, VoiceChannel } from 'discord.js';
+import {
+	Message,
+	StageChannel,
+	VoiceChannel
+} from 'discord.js';
 import {
 	joinVoiceChannel,
 	entersState,
@@ -11,7 +15,7 @@ import {
 } from '@discordjs/voice';
 import DJDog from './DJDog';
 import ReplyVM from './ReplyVM';
-
+import { APIMessage } from 'discord.js/node_modules/discord-api-types';
 
 export default class Session
 {
@@ -22,6 +26,13 @@ export default class Session
 	private signal: AbortSignal;
 	//Viewmodel for the "Currently playing" reply message
 	public replyVM?: ReplyVM;
+
+	async linkVM(pReply: Promise<Message|APIMessage>) {
+		const reply = await pReply;
+		if (reply instanceof Message) {
+			this.replyVM = new ReplyVM(reply);
+		}
+	}
 
 	/**
 	 * Starts a new session.

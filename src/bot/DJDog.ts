@@ -1,38 +1,28 @@
 import { refreshSlashCommands, createInteractions } from './CommandManager';
 import Session from './Session';
-import { secret } from '../Secrets';
+import { Secrets } from '../Secrets';
 
 import {
 	Client,
 	Intents,
-	Message,
 	StageChannel,
 	VoiceChannel
 } from 'discord.js';
-import { APIMessage } from 'discord.js/node_modules/discord-api-types';
-import ReplyVM from './ReplyVM';
-
 
 export default class DJDog
 {
-	async linkVM(session: Session, pReply: Promise<Message|APIMessage>) {
-		const reply = await pReply;
-		if (reply instanceof Message) {
-			session.replyVM = new ReplyVM(reply);
-		}
-	}
 	protected client: Client;
-	private sessions: Session[];
+	private sessions: Session[]		= [];
 
 	//Command initialization methods
-	private refreshSlashCommands = refreshSlashCommands;
-	private createInteractions = createInteractions;
+	private refreshSlashCommands	= refreshSlashCommands;
+	private createInteractions		= createInteractions;
 
 	/**
 	 * Bot class, initializes commands and manages sessions.
 	 * @param secrets the contents of confidential.json
 	 */
-	public constructor(protected secrets: secret)
+	public constructor(protected secrets: Secrets)
 	{
 		this.client = new Client({
 			intents: [
@@ -43,8 +33,6 @@ export default class DJDog
 
 		this.refreshSlashCommands();
 		this.createInteractions();
-
-		this.sessions = [];
 
 		this.client.login(this.secrets.token);
 		this.client.on('ready', () => {

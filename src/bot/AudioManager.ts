@@ -14,7 +14,7 @@ import { Converter } from 'ffmpeg-stream';
 import { ExecaChildProcess } from 'execa';
 import { Readable } from 'stream';
 
-export class AudioManager
+export default class AudioManager
 {
 	private timeoutTime: number = 60;
 	private timeout: NodeJS.Timeout;
@@ -41,6 +41,9 @@ export class AudioManager
 		
 		this.audioPlayer.on('error', console.error );
 
+		// @ts-ignore
+		// not sure why this was giving an intellisense error,
+		// and there is no compiler error
 		this.audioPlayer.on('stateChange', (oldState, newState) => {
 			if(newState.status == AudioPlayerStatus.Idle && oldState.status != AudioPlayerStatus.Idle)
 			{
@@ -48,7 +51,7 @@ export class AudioManager
 				this.startTimeout();
 				this.queue.advance();
 				this.checkQueue();
-			} 
+			}
 		});
 	}
 
@@ -160,24 +163,4 @@ export class AudioManager
 		else
 			return true;
 	}
-
-
-	/**
-	 * Functions below were for the download strategy, now deprecated.
-	 */
-
-	// private async probeAndCreateResource(path: string): Promise<AudioResource> {
-	//     const readableStream = createReadStream(path);
-	//     const { stream, type } = await demuxProbe(readableStream);
-	//     return createAudioResource(stream, { inputType: type });
-	// }
-
-	// public async play(trackInfo: TrackInfo)
-	// {
-	//     const resource = await this.probeAndCreateResource(trackInfo.path);
-	//     this.audioPlayer.play(resource);
-
-	//     await waitForMs(trackInfo.duration * 1000);
-	// }
 };
-

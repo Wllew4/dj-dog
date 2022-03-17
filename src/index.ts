@@ -1,6 +1,6 @@
 import DJDog from './bot/DJDog';
-import Secrets from './Secrets';
+import getSecrets from './Secrets';
 
-Secrets.getSecrets().then((s) => {
-	new DJDog(s);
-});
+(async() => {
+	new DJDog(await getSecrets());
+})();

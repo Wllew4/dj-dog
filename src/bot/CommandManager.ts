@@ -66,7 +66,7 @@ export async function createInteractions(this: DJDog)
 		case 'join':
 			session.join();
 			i.reply(`Joining voice channel: ${i.member.voice.channel.name}`);
-			if (!session.replyVM) this.linkVM(session, i.fetchReply());
+			if (!session.replyVM) session.linkVM(i.fetchReply());
 			return;
 
 		case 'leave':
@@ -77,7 +77,7 @@ export async function createInteractions(this: DJDog)
 		case 'play':
 			session.play(i.options.getString('song', true));
 			i.reply(`Added ${i.options.getString("song", true)} to the queue.`);
-			if (!session.replyVM) this.linkVM(session, i.fetchReply());
+			if (!session.replyVM) session.linkVM(i.fetchReply());
 			return;
 
 		case 'queue':
