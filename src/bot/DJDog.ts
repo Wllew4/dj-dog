@@ -1,5 +1,5 @@
 import { refreshSlashCommands, createInteractions } from './CommandManager';
-import { Session } from './Session';
+import Session from './Session';
 import { secret } from '../Secrets';
 
 import {
@@ -13,7 +13,7 @@ import { APIMessage } from 'discord.js/node_modules/discord-api-types';
 import ReplyVM from './ReplyVM';
 
 
-export class DJDog
+export default class DJDog
 {
 	async linkVM(session: Session, pReply: Promise<Message|APIMessage>) {
 		const reply = await pReply;

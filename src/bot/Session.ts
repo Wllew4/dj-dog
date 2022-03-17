@@ -9,11 +9,11 @@ import {
 	VoiceConnectionStatus,
 	VoiceConnection
 } from '@discordjs/voice';
-import { DJDog } from './DJDog';
+import DJDog from './DJDog';
 import ReplyVM from './ReplyVM';
 
 
-export class Session
+export default class Session
 {
 	private audioManager: AudioManager;
 	private connection: VoiceConnection;

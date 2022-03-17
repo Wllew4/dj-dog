@@ -1,4 +1,4 @@
-import { DJDog } from './DJDog';
+import DJDog from './DJDog';
 
 import { GuildMember, Interaction, TextChannel } from 'discord.js';
 import { REST } from '@discordjs/rest';
@@ -15,19 +15,11 @@ export async function refreshSlashCommands(this: DJDog)
 	try
 	{
 		const commands = require('../../commands.json');
-		// if(this.secrets.debug)
-		//     await rest.put(
-		//         Routes.applicationGuildCommands(
-		//             this.secrets.client_id,
-		//             this.secrets.guild_id
-		//         ),
-		//         { body: commands });
-		// else
-			await rest.put(
-				Routes.applicationCommands(
-					this.secrets.client_id,
-				),
-				{ body: commands });
+		await rest.put(
+			Routes.applicationCommands(
+				this.secrets.client_id,
+			),
+			{ body: commands });
 	}
 	catch (e)
 	{

@@ -1,6 +1,6 @@
 import Track from './Track';
-import { Session } from './Session';
-import { Queue } from "../util/util";
+import Session from './Session';
+import Queue from "./Queue";
 
 import {
 	AudioPlayer,

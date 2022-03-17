@@ -4,7 +4,7 @@ export interface secret {
 	youtube_api_key:""
 };
 
-class Secrets {
+export default class Secrets {
 	private static secrets: secret;
 
 	static async getSecrets () {
@@ -17,5 +17,3 @@ class Secrets {
 		return this.secrets;
 	};
 }
-
-export default Secrets;

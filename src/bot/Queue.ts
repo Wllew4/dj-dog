@@ -1,16 +1,7 @@
 /**
- * Use with await to sleep thread
- * @param ms time to wait in milliseconds
- */
-export async function waitForMs(ms: number)
-{
-	await new Promise( f => setTimeout(f, ms));
-}
-
-/**
  * Generic class for handling FIFO queues
  */
-export class Queue<T>
+export default class Queue<T>
 {
 	private data: T[] = [];
 
