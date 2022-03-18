@@ -64,7 +64,7 @@ export default class AudioManager
 
 	/**
 	 * Prepares a new converter
-	 * @param ytdl The incoming audio/video stream
+	 * @param mediaStream The incoming audio/video stream
 	 * @returns The converted audio stream
 	 */
 	convert(mediaStream:Readable): Readable {
