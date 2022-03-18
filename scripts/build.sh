@@ -1,3 +1,3 @@
 # Build
-npm i
+npm ci
 npm run tsc

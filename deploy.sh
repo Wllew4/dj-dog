@@ -1,6 +1,6 @@
 # Deploy
 # Install deps
-chmod -r +x ./scripts
+chmod -R +x ./scripts
 ./scripts/install-node.sh
 ./scripts/install-python.sh
 ./scripts/install-ffmpeg.sh
