@@ -5,7 +5,7 @@ chmod -R +x /scripts
 ./scripts/install-python.sh
 ./scripts/install-ffmpeg.sh
 # Build bot
-source ~/.bashrc
 ./scripts/build.sh
 # Run
+source ~/.bashrc
 node build/index.js
