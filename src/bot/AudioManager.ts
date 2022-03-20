@@ -116,7 +116,8 @@ export default class AudioManager
 			this.downloader = youtubedlraw(track.url, {f:'bestaudio/worst', o:'-', noCheckCertificate:true, noCallHome:true, forceIpv4:true});
 			if (!this.downloader.stdout) throw Error('Download process has no stdout???');
 			// no joke, downloader will quit if nobody listens to its errors :(
-			this.downloader.stderr?.on('data', (e)=>{ console.log(e) });
+			// Logging here outputs transferred buffers lol
+			this.downloader.stderr?.on('data', (e)=>{ /* console.log(e) */});
 			const audioStream = this.convert(this.downloader.stdout);
 			const resource = createAudioResource(audioStream, { inputType: StreamType.OggOpus });
 			this.audioPlayer.play(resource);
