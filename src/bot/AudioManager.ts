@@ -113,10 +113,10 @@ export default class AudioManager
 			// if audio-only formats are offered, download the highest quality one
 			// else fall back to the worst video+audio format
 			// output to process stdout so we can stream this
-			this.downloader = youtubedlraw(track.url, {f:'bestaudio/worst', o:'-', noCheckCertificate:true, noCallHome:true, forceIPv4:true});
+			this.downloader = youtubedlraw(track.url, {f:'bestaudio/worst', o:'-', noCheckCertificate:true, noCallHome:true, forceIpv4:true});
 			if (!this.downloader.stdout) throw Error('Download process has no stdout???');
 			// no joke, downloader will quit if nobody listens to its errors :(
-			this.downloader.stderr?.on('data', ()=>{/* cool story bro */});
+			this.downloader.stderr?.on('data', (e)=>{ console.log(e) });
 			const audioStream = this.convert(this.downloader.stdout);
 			const resource = createAudioResource(audioStream, { inputType: StreamType.OggOpus });
 			this.audioPlayer.play(resource);
