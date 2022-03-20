@@ -19,5 +19,5 @@ cd dj-dog
 ```sh
 # Installs additional dependencies and runs compiled js
 chmod +x ./deploy.sh
-./deploy.sh
+. ./deploy.sh
 ```

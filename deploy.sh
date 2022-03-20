@@ -2,9 +2,9 @@
 # Install deps
 chmod -R +x /scripts
 . ./scripts/install-node.sh
-. ./scripts/install-python.sh
-. ./scripts/install-ffmpeg.sh
+./scripts/install-python.sh
+./scripts/install-ffmpeg.sh
 # Build bot
-. ./scripts/build.sh
+./scripts/build.sh
 # Run
-. node build/index.js
+node build/index.js
