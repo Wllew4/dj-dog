@@ -12,17 +12,15 @@ export default class SearchManager
 		const res = await fetch(`//www.googleapis.com/youtube/v3/search?key=${youtube_api_key}&q=${query}&maxResults=1&type=video&videoCategoryId=10&safeSearch=none`, { method: 'GET' });
 
 		if (!res.ok) {
+			console.log("Bad response from server:");
 			console.error(res);
-			throw new Error("Bad response from server");
+			return null;
 		}
 
 		const resJson = await res.json();
-		// console.log(resJson);
 
-		// @ts-ignore
 		const searchResult = resJson.items[0];
 		if (!searchResult) {
-			// throw Error(`No video found for query: ${query}`);
 			console.log(`No video found for query: ${query}`);
 			return null;
 		}

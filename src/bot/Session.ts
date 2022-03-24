@@ -16,9 +16,12 @@ import {
 import DJDog from './DJDog';
 import ReplyVM from './ReplyVM';
 import { APIMessage } from 'discord.js/node_modules/discord-api-types';
+import Queue from './Queue';
 
 export default class Session
 {
+	public queue: Queue<Track>;
+
 	private audioManager: AudioManager;
 	private connection: VoiceConnection;
 
@@ -40,6 +43,8 @@ export default class Session
 	 */
 	constructor(public vChannel: VoiceChannel | StageChannel, public dj: DJDog)
 	{
+		this.queue = new Queue<Track>();
+
 		this.connection = joinVoiceChannel({
 			channelId: this.vChannel.id,
 			guildId: this.vChannel.guild.id,
@@ -102,7 +107,7 @@ export default class Session
 			{
 				track = new Track(song);
 			
-				this.audioManager.queue.add(track);
+				this.queue.add(track);
 				this.audioManager.checkQueue();
 			}
 			else return false;
@@ -110,17 +115,21 @@ export default class Session
 		return true;
 	}
 
+	public remove(i: number): Track
+	{
+		return this.queue.remove(i);
+	}
+
 	/**
 	 * Gets a list of the queued up tracks
 	 * @returns The queued up tracks
 	 */
-	public showQueue(): string
+	public async showQueue(): Promise<string>
 	{
-		const queue = this.audioManager.queue;
-		let o: string = `\`\`\`${queue.length()} items in queue:\n`;
-		for(let i = 0; i < queue.length(); i++)
+		let o: string = `\`\`\`${this.queue.length()} items in queue:\n`;
+		for(let i = 0; i < this.queue.length(); i++)
 		{
-			o += `${i+1}. ${queue.at(i).url}\n`;
+			o += `${i+1}. ${(await this.queue.at(i).info).title}\n`;
 		}
 		o += `\`\`\``;
 		return o;

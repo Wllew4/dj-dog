@@ -21,8 +21,8 @@ export default class AudioManager
 
 	private downloader?: ExecaChildProcess;
 	public audioPlayer: AudioPlayer;
-	public queue: Queue<Track>;
 	
+	private queue: Queue<Track>;
 	private paused: boolean = false;
 
 	/**
@@ -31,7 +31,7 @@ export default class AudioManager
 	 */
 	public constructor(private session: Session)
 	{
-		this.queue = new Queue<Track>();
+		this.queue = session.queue;
 		this.timeout = setTimeout(()=>{},0);
 		this.startTimeout();
 
@@ -49,7 +49,7 @@ export default class AudioManager
 			{
 				//Track concluded
 				this.startTimeout();
-				this.queue.advance();
+				// session.queue.advance();
 				this.checkQueue();
 			}
 		});
@@ -92,7 +92,7 @@ export default class AudioManager
 			return;
 		}
 		if(this.queue.length() == 0)
-		//queue is empty
+			//queue is empty
 			return;
 		this.stream();
 	}
@@ -102,7 +102,9 @@ export default class AudioManager
 	 */
 	public async stream() {
 		clearTimeout(this.timeout);
-		const track = this.queue.get();
+		const track = this.queue.advance();
+		if(!track)
+			return;
 		track.info.then(()=>{
 			if (this.session.replyVM) {
 				this.session.replyVM.track = track;

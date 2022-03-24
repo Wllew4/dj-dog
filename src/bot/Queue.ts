@@ -17,20 +17,25 @@ export default class Queue<T>
 	}
 
 	/**
-	 * Get item at the top of the queue
-	 * @returns item at top of queue
+	 * Removes and returns the first element of queue,
+	 * shifts all other elements down
+	 * @returns the front of the queue
 	 */
-	public get(): T
+	public advance(): T | undefined
 	{
-		return this.data[0];
+		return this.data.shift();
 	}
 
 	/**
-	 * Remove first element of queue, shift all other elements down
+	 * Remove an item from the Queue
+	 * @param i the index to remove
+	 * @returns the value removed
 	 */
-	public advance()
+	public remove(i: number): T
 	{
-		this.data.shift();
+		let out = this.data[i];
+		this.data.splice(i, 1);
+		return out;
 	}
 
 	/**

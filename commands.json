@@ -32,6 +32,18 @@
 		"description": "See what tracks are queued up."
 	},
 	{
+		"name": "remove",
+		"description": "Remove a song from the queue",
+		"options": [
+			{
+				"name": "index",
+				"description": "The index of the song in the queue to remove",
+				"type": 4,
+				"required": true
+			}
+		]
+	},
+	{
 		"name": "skip",
 		"description": "Skip to the next song in the queue."
 	},

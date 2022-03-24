@@ -20,7 +20,7 @@ export async function refreshSlashCommands(this: DJDog)
 		await rest.put(
 			Routes.applicationGuildCommands(
 			this.secrets.client_id,
-			"887541961161080883"
+			"512426401521991681"
 			),
         { body: commands });
 
@@ -93,8 +93,14 @@ export async function createInteractions(this: DJDog)
 			return;
 
 		case 'queue':
-			const queue = session.showQueue();
+			const queue = await session.showQueue();
 			i.reply(queue);
+			return;
+		
+		case 'remove':
+			const index = i.options.getInteger('index', true);
+			let removed = session.remove(index - 1);
+			i.reply(`Removed ${(await removed.info).title} from the queue!`);
 			return;
 
 		case 'skip':
