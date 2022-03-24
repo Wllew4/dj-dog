@@ -15,6 +15,15 @@ export async function refreshSlashCommands(this: DJDog)
 	try
 	{
 		const commands = require('../../commands.json');
+
+		// DEBUG
+		await rest.put(
+			Routes.applicationGuildCommands(
+			this.secrets.client_id,
+			"887541961161080883"
+			),
+        { body: commands });
+
 		await rest.put(
 			Routes.applicationCommands(
 				this.secrets.client_id,
@@ -75,8 +84,11 @@ export async function createInteractions(this: DJDog)
 			return;
 
 		case 'play':
-			session.play(i.options.getString('song', true));
-			i.reply(`Added ${i.options.getString("song", true)} to the queue.`);
+			let query = i.options.getString('song', true)
+			if(await session.play(query))
+				i.reply(`Added ${query} to the queue.`);
+			else
+				i.reply(`Could not find a video for query ${query}`);
 			if (!session.replyVM) session.linkVM(i.fetchReply());
 			return;
 

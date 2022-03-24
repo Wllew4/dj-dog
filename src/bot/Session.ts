@@ -91,14 +91,23 @@ export default class Session
 	 * Adds a song to the queue
 	 * @param query The url/query for the song to queue up
 	 */
-	public async play(query: string): Promise<Track>
+	public async play(query: string): Promise<boolean>
 	{
-		let track: Track;
+		let track: Track | null;
 		if (SearchManager.isValidUrl(query)) track = new Track(query);
-		else track = new Track(await SearchManager.search(query));
-		this.audioManager.queue.add(track);
-		this.audioManager.checkQueue();
-		return track;
+		else
+		{
+			let song = await SearchManager.search(query);
+			if(song != null)
+			{
+				track = new Track(song);
+			
+				this.audioManager.queue.add(track);
+				this.audioManager.checkQueue();
+			}
+			else return false;
+		}
+		return true;
 	}
 
 	/**

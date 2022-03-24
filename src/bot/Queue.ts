@@ -6,12 +6,14 @@ export default class Queue<T>
 	private data: T[] = [];
 
 	/**
-	 * Add an item to the queue
+	 * Add a non-null item to the queue
 	 * @param item item to add to queue
 	 */
 	public add(item: T)
 	{
-		this.data.push(item);
+		// Dont add null items
+		if(item != null)
+			this.data.push(item);
 	}
 
 	/**
