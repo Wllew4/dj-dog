@@ -22,6 +22,7 @@ import Queue from './Queue';
 export default class Session
 {
 	public queue: Queue<Track>;
+	public currentTrack: Track | undefined;
 	
 	private timeoutTime: number = 60;
 	private timeout: NodeJS.Timeout;
@@ -71,16 +72,14 @@ export default class Session
 		// and there is no compiler error
 		this.audioManager.audioPlayer.on('stateChange', (oldState, newState) => {
 			if(newState.status == AudioPlayerStatus.Idle && oldState.status != AudioPlayerStatus.Idle)
-			{
-				this.update();
-			}
+				this.advanceSong();
 		});
 	}
 
 	/**
 	 * Call to change songs
 	 */
-	private async update()
+	private async advanceSong()
 	{
 		// If the queue is empty, start the disconnect timer
 		// and do not progress to next track
@@ -92,24 +91,28 @@ export default class Session
 		}
 		else
 			clearTimeout(this.timeout);
-		
+
 		// Currently playing music, don't start next song
 		if(!this.audioManager.isIdle())
 			return;
-			
-		// Play next song
-		const track = this.queue.advance();
-		if(!track)
-			return;
-		this.audioManager.stream(track);
 		
-		// Update logs and VM
-		console.log(`Now playing: ${(await track.info).title}`);
-		track.info.then(()=>{
-			if (this.replyVM) {
-				this.replyVM.track = track;
-			}
-		});
+		// Play next song
+		this.currentTrack = this.queue.advance();
+		if(this.currentTrack == undefined)
+			return;
+		this.audioManager.stream(this.currentTrack);
+
+		console.log(`Now playing: ${(await this.currentTrack.info).title}`);
+		this.updateVM();
+	}
+
+	private updateVM()
+	{
+		if(this.replyVM)
+		{
+			this.replyVM.track = this.currentTrack;
+			this.replyVM.queue = this.queue;
+		}
 	}
 	
 	/**
@@ -170,31 +173,24 @@ export default class Session
 				track = new Track(song);
 			
 				this.queue.add(track);
-				this.update();
+				this.updateVM();
+				this.advanceSong();
 			}
 			else return false;
 		}
 		return true;
 	}
 
+	/**
+	 * Remove a song from the queue
+	 * @param i Index for removal
+	 * @returns the Track removed
+	 */
 	public remove(i: number): Track
 	{
-		return this.queue.remove(i);
-	}
-
-	/**
-	 * Gets a list of the queued up tracks
-	 * @returns The queued up tracks
-	 */
-	public async showQueue(): Promise<string>
-	{
-		let o: string = `\`\`\`${this.queue.length()} items in queue:\n`;
-		for(let i = 0; i < this.queue.length(); i++)
-		{
-			o += `${i+1}. ${(await this.queue.at(i).info).title}\n`;
-		}
-		o += `\`\`\``;
-		return o;
+		let out = this.queue.remove(i);
+		this.updateVM();
+		return out;
 	}
 
 	/**
@@ -204,6 +200,7 @@ export default class Session
 	public async skip(): Promise<boolean>
 	{
 		this.audioManager.stop();
+		this.updateVM();
 		return this.queue.isEmpty();
 	}
 

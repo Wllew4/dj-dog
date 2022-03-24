@@ -1,4 +1,5 @@
 import { Message } from "discord.js";
+import Queue from "./Queue";
 import Track from "./Track";
 
 /**
@@ -7,11 +8,19 @@ import Track from "./Track";
  */
 class ReplyVM {
 	private _track: Track | undefined = undefined;
+	private _queue: Queue<Track> | undefined = undefined;
 	public get track(): Track | undefined {
 		return this._track;
 	}
 	public set track(value: Track | undefined) {
 		this._track = value;
+		this.render();
+	}
+	public get queue(): Queue<Track> | undefined {
+		return this._queue;
+	}
+	public set queue(value: Queue<Track> | undefined) {
+		this._queue = value;
 		this.render();
 	}
 	private _isPlaying: boolean = true;
@@ -21,7 +30,16 @@ class ReplyVM {
 	 */
 	constructor(private readonly _replyMessage: Message) {
 	}
-	private async render(): Promise<void>{
+	public async render(): Promise<void>{
+		// Update Queue
+		let queueS = "";
+		if(this._queue)
+		{
+			for(let i = 0; i < this._queue.length(); i++)
+				queueS += `${i+1}. ${(await this._queue.at(i).info).title}\n`;
+		}
+
+		// Update current track
 		if (this._track){
 			const info = await this._track.info;
 			let thumb = null;
@@ -52,7 +70,7 @@ class ReplyVM {
 						[
 							{
 								name: "Queue",
-								value: `1. Title\n2. Title\n3. Title`
+								value: (queueS != "") ? queueS : "Queue is Empty"
 							}
 						]
 					}

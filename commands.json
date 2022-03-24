@@ -28,10 +28,6 @@
 		]
 	},
 	{
-		"name": "queue",
-		"description": "See what tracks are queued up."
-	},
-	{
 		"name": "remove",
 		"description": "Remove a song from the queue",
 		"options": [
@@ -42,10 +38,6 @@
 				"required": true
 			}
 		]
-	},
-	{
-		"name": "now",
-		"description": "See what's currently playing"
 	},
 	{
 		"name": "skip",

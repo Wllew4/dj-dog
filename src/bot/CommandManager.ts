@@ -91,24 +91,11 @@ export async function createInteractions(this: DJDog)
 				i.reply(`Could not find a video for query ${query}`);
 			if (!session.replyVM) session.linkVM(i.fetchReply());
 			return;
-
-		case 'queue':
-			const queue = await session.showQueue();
-			i.reply(queue);
-			return;
 		
 		case 'remove':
 			const index = i.options.getInteger('index', true);
 			const removed = session.remove(index - 1);
 			i.reply(`Removed ${(await removed.info).title} from the queue!`);
-			return;
-
-		case 'now':
-			const track = session.replyVM?.track;
-			if(!track)
-				i.reply("Nothing currently playing!");
-			else
-				i.reply(`Currently playing: ${(await track.info).title}`);
 			return;
 
 		case 'skip':
