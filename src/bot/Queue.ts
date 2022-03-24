@@ -39,6 +39,14 @@ export default class Queue<T>
 	}
 
 	/**
+	 * @returns true if this queue is empty
+	 */
+	public isEmpty(): boolean
+	{
+		return this.data.length == 0;
+	}
+
+	/**
 	 * Get the length of the queue
 	 * @returns the length of the queue
 	 */

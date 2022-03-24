@@ -11,7 +11,8 @@ import {
 	joinVoiceChannel,
 	entersState,
 	VoiceConnectionStatus,
-	VoiceConnection
+	VoiceConnection,
+	AudioPlayerStatus
 } from '@discordjs/voice';
 import DJDog from './DJDog';
 import ReplyVM from './ReplyVM';
@@ -21,13 +22,16 @@ import Queue from './Queue';
 export default class Session
 {
 	public queue: Queue<Track>;
+	
+	private timeoutTime: number = 60;
+	private timeout: NodeJS.Timeout;
 
 	private audioManager: AudioManager;
 	private connection: VoiceConnection;
 
 	private controller: AbortController;
 	private signal: AbortSignal;
-	//Viewmodel for the "Currently playing" reply message
+	// Viewmodel for the "Currently playing" reply message
 	public replyVM?: ReplyVM;
 
 	async linkVM(pReply: Promise<Message|APIMessage>) {
@@ -45,6 +49,9 @@ export default class Session
 	{
 		this.queue = new Queue<Track>();
 
+		this.timeout = setTimeout(()=>{},0);
+		this.startTimeout();
+
 		this.connection = joinVoiceChannel({
 			channelId: this.vChannel.id,
 			guildId: this.vChannel.guild.id,
@@ -53,11 +60,66 @@ export default class Session
 			selfMute: false
 		});
 
-		this.audioManager = new AudioManager(this);
+		this.audioManager = new AudioManager();
 		this.connection.subscribe(this.audioManager.audioPlayer);
 
 		this.controller = new AbortController();
 		this.signal = this.controller.signal;
+
+		// @ts-ignore
+		// not sure why this was giving an intellisense error,
+		// and there is no compiler error
+		this.audioManager.audioPlayer.on('stateChange', (oldState, newState) => {
+			if(newState.status == AudioPlayerStatus.Idle && oldState.status != AudioPlayerStatus.Idle)
+			{
+				this.update();
+			}
+		});
+	}
+
+	/**
+	 * Call to change songs
+	 */
+	private async update()
+	{
+		// If the queue is empty, start the disconnect timer
+		// and do not progress to next track
+		// Otherwise, end potential existing timers
+		if(this.queue.isEmpty())
+		{
+			this.startTimeout();
+			return;
+		}
+		else
+			clearTimeout(this.timeout);
+		
+		// Currently playing music, don't start next song
+		if(!this.audioManager.isIdle())
+			return;
+			
+		// Play next song
+		const track = this.queue.advance();
+		if(!track)
+			return;
+		this.audioManager.stream(track);
+		
+		// Update logs and VM
+		console.log(`Now playing: ${(await track.info).title}`);
+		track.info.then(()=>{
+			if (this.replyVM) {
+				this.replyVM.track = track;
+			}
+		});
+	}
+	
+	/**
+	 * Start the countdown to bot disconnection
+	 */
+	private startTimeout()
+	{
+		this.timeout = setTimeout(() => {
+			this.dj.endSession(this);
+		}, this.timeoutTime * 1000);
 	}
 
 	/**
@@ -108,7 +170,7 @@ export default class Session
 				track = new Track(song);
 			
 				this.queue.add(track);
-				this.audioManager.checkQueue();
+				this.update();
 			}
 			else return false;
 		}
@@ -141,7 +203,8 @@ export default class Session
 	 */
 	public async skip(): Promise<boolean>
 	{
-		return await this.audioManager.stop();
+		this.audioManager.stop();
+		return this.queue.isEmpty();
 	}
 
 	/**

@@ -47,7 +47,14 @@ class ReplyVM {
 						//     text: `${'Foshka#0001'}`,
 						//     iconURL: 'https://cdn.discordapp.com/avatars/124131215547695104/73bd451ab76416e584b316b35c37eb8c.webp?size=128'
 						// },
-						timestamp:Date.now()
+						timestamp:Date.now(),
+						fields:
+						[
+							{
+								name: "Queue",
+								value: `1. Title\n2. Title\n3. Title`
+							}
+						]
 					}
 				]
 			});
