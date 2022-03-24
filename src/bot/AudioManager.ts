@@ -48,8 +48,7 @@ export default class AudioManager
 			if(newState.status == AudioPlayerStatus.Idle && oldState.status != AudioPlayerStatus.Idle)
 			{
 				//Track concluded
-				this.startTimeout();
-				// session.queue.advance();
+				// this.startTimeout();
 				this.checkQueue();
 			}
 		});
@@ -105,6 +104,7 @@ export default class AudioManager
 		const track = this.queue.advance();
 		if(!track)
 			return;
+		console.log(`Now playing: ${(await track.info).title}`);
 		track.info.then(()=>{
 			if (this.session.replyVM) {
 				this.session.replyVM.track = track;

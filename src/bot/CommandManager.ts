@@ -99,8 +99,16 @@ export async function createInteractions(this: DJDog)
 		
 		case 'remove':
 			const index = i.options.getInteger('index', true);
-			let removed = session.remove(index - 1);
+			const removed = session.remove(index - 1);
 			i.reply(`Removed ${(await removed.info).title} from the queue!`);
+			return;
+
+		case 'now':
+			const track = session.replyVM?.track;
+			if(!track)
+				i.reply("Nothing currently playing!");
+			else
+				i.reply(`Currently playing: ${(await track.info).title}`);
 			return;
 
 		case 'skip':

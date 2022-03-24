@@ -44,6 +44,10 @@
 		]
 	},
 	{
+		"name": "now",
+		"description": "See what's currently playing"
+	},
+	{
 		"name": "skip",
 		"description": "Skip to the next song in the queue."
 	},
