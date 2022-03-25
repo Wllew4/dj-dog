@@ -27,13 +27,14 @@ export default class Session
 	private timeoutTime: number = 60;
 	private timeout: NodeJS.Timeout;
 
-	private audioManager: AudioManager;
-	private connection: VoiceConnection;
-
-	private controller: AbortController;
-	private signal: AbortSignal;
 	// Viewmodel for the "Currently playing" reply message
 	public replyVM?: ReplyVM;
+
+	private audioManager: AudioManager;
+	
+	private connection: VoiceConnection;
+	private controller: AbortController;
+	private signal: AbortSignal;
 
 	async linkVM(pReply: Promise<Message|APIMessage>) {
 		const reply = await pReply;
@@ -173,8 +174,8 @@ export default class Session
 				track = new Track(song);
 			
 				this.queue.add(track);
-				this.updateVM();
 				this.advanceSong();
+				this.updateVM();
 			}
 			else return false;
 		}
