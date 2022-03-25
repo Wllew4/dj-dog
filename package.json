@@ -25,6 +25,6 @@
 		"discord.js": "^13.1.0",
 		"ffmpeg-stream": "^0.7.0",
 		"libsodium-wrappers": "^0.7.9",
-		"youtube-dl-exec": "^1.2.6"
+		"youtube-dl-exec": "^2.0.8"
 	}
 }
