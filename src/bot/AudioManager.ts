@@ -7,7 +7,7 @@ import {
 	createAudioResource,
 	NoSubscriberBehavior,
 	StreamType } from '@discordjs/voice';
-import { raw as youtubedlraw } from 'youtube-dl-exec';
+import { exec } from 'youtube-dl-exec';
 import { Converter } from 'ffmpeg-stream';
 import { ExecaChildProcess } from 'execa';
 import { Readable } from 'stream';
@@ -41,7 +41,14 @@ export default class AudioManager
 			// if audio-only formats are offered, download the highest quality one
 			// else fall back to the worst video+audio format
 			// output to process stdout so we can stream this
-			this.downloader = youtubedlraw(track.url, {f:'bestaudio/worst', o:'-', noCheckCertificate:true, noCallHome:true, forceIpv4:true});
+			this.downloader = exec(track.url,
+				{
+					format:'bestaudio/worst',
+					output:'-',
+					noCheckCertificate:true,
+					callHome:false,
+					forceIpv4:true
+				});
 			if (!this.downloader.stdout) throw Error('Download process has no stdout???');
 			// no joke, downloader will quit if nobody listens to its errors :(
 			// Logging here outputs transferred buffers lol
