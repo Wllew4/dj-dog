@@ -88,6 +88,8 @@ export default class Session
 		if(this.queue.isEmpty())
 		{
 			this.startTimeout();
+			this.currentTrack = undefined;
+			this.updateVM();
 			return;
 		}
 		else
@@ -202,7 +204,7 @@ export default class Session
 	{
 		this.audioManager.stop();
 		this.updateVM();
-		return this.queue.isEmpty();
+		return !this.queue.isEmpty();
 	}
 
 	/**

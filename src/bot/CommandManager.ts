@@ -76,6 +76,7 @@ export async function createInteractions(this: DJDog)
 			session.join();
 			i.reply(`Joining voice channel: ${i.member.voice.channel.name}`);
 			if (!session.replyVM) session.linkVM(i.fetchReply());
+			else setTimeout(()=>{i.deleteReply()}, 5000);
 			return;
 
 		case 'leave':
@@ -90,12 +91,14 @@ export async function createInteractions(this: DJDog)
 			else
 				i.reply(`Could not find a video for query ${query}`);
 			if (!session.replyVM) session.linkVM(i.fetchReply());
+			else setTimeout(()=>{i.deleteReply()}, 5000);
 			return;
 		
 		case 'remove':
 			const index = i.options.getInteger('index', true);
 			const removed = session.remove(index - 1);
 			i.reply(`Removed ${(await removed.info).title} from the queue!`);
+			setTimeout(()=>{i.deleteReply()}, 5000);
 			return;
 
 		case 'skip':
@@ -104,6 +107,7 @@ export async function createInteractions(this: DJDog)
 				i.reply('Skipped!');
 			else
 				i.reply('The queue is empty!');
+			setTimeout(()=>{i.deleteReply()}, 5000);
 			return;
 
 		case 'pause':
@@ -112,6 +116,7 @@ export async function createInteractions(this: DJDog)
 				(isPaused ? 'Paused': 'Unpaused')
 					+ ' playback.'
 			);
+			setTimeout(()=>{i.deleteReply()}, 5000);
 			return;
 		}
 	});

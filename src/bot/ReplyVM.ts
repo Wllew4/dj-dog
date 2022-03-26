@@ -76,8 +76,10 @@ class ReplyVM {
 					}
 				]
 			});
-		} else {
-			this._replyMessage.edit("Nothing playing right now, reply to the thread or type /play <song> to add a song.");
+		}
+		else
+		{
+			this._replyMessage.edit("Nothing playing right now, type /play <song> to add a song to the queue.");
 		}
 	};
 }
