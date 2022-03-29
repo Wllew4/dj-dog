@@ -17,12 +17,12 @@ export async function refreshSlashCommands(this: DJDog)
 		const commands = require('../../commands.json');
 
 		// DEBUG
-		await rest.put(
-			Routes.applicationGuildCommands(
-			this.secrets.client_id,
-			"512426401521991681"
-			),
-        { body: commands });
+		// await rest.put(
+		// 	Routes.applicationGuildCommands(
+		// 	this.secrets.client_id,
+		// 	"512426401521991681"
+		// 	),
+        // { body: commands });
 
 		await rest.put(
 			Routes.applicationCommands(

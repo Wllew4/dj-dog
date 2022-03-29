@@ -23,7 +23,7 @@ export default class Session
 {
 	public queue: Queue<Track>;
 	public currentTrack: Track | undefined;
-	
+
 	private timeoutTime: number = 60;
 	private timeout: NodeJS.Timeout;
 
@@ -31,7 +31,7 @@ export default class Session
 	public replyVM?: ReplyVM;
 
 	private audioManager: AudioManager;
-	
+
 	private connection: VoiceConnection;
 	private controller: AbortController;
 	private signal: AbortSignal;
@@ -98,7 +98,7 @@ export default class Session
 		// Currently playing music, don't start next song
 		if(!this.audioManager.isIdle())
 			return;
-		
+
 		// Play next song
 		this.currentTrack = this.queue.advance();
 		if(this.currentTrack == undefined)
@@ -117,7 +117,7 @@ export default class Session
 			this.replyVM.queue = this.queue;
 		}
 	}
-	
+
 	/**
 	 * Start the countdown to bot disconnection
 	 */
@@ -167,20 +167,20 @@ export default class Session
 	public async play(query: string): Promise<boolean>
 	{
 		let track: Track | null;
-		if (SearchManager.isValidUrl(query)) track = new Track(query);
+		if (SearchManager.isValidUrl(query))
+			track = new Track(query);
 		else
 		{
 			let song = await SearchManager.search(query);
-			if(song != null)
-			{
-				track = new Track(song);
-			
-				this.queue.add(track);
-				this.advanceSong();
-				this.updateVM();
-			}
-			else return false;
+			if(song == null)
+				return false;
+			track = new Track(song);
 		}
+
+		this.queue.add(track);
+		this.advanceSong();
+		this.updateVM();
+
 		return true;
 	}
 
