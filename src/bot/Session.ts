@@ -125,6 +125,7 @@ export default class Session
 	{
 		this.timeout = setTimeout(() => {
 			this.dj.endSession(this);
+			this.replyVM?.remove();
 		}, this.timeoutTime * 1000);
 	}
 

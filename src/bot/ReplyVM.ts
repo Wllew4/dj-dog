@@ -82,6 +82,10 @@ class ReplyVM {
 			this._replyMessage.edit("Nothing playing right now, type /play <song> to add a song to the queue.");
 		}
 	};
+	public remove()
+	{
+		this._replyMessage.delete();
+	}
 }
 
 export default ReplyVM;
