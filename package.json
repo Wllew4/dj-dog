@@ -1,8 +1,6 @@
 {
 	"name": "dj-dog",
-	"version": "1.0.0",
-	"description": "",
-	"main": "./build/index.js",
+	"version": "3.0.0",
 	"engines": {
 		"node": "16.x.x"
 	},
@@ -12,8 +10,8 @@
 		"start": "node build/index.js"
 	},
 	"keywords": [],
-	"author": "",
-	"license": "ISC",
+	"author": "Wllew4 & Foshka",
+	"license": "MIT",
 	"devDependencies": {
 		"typescript": "^4.4.3"
 	},

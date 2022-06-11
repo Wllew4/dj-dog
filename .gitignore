@@ -1,16 +1,5 @@
-#Dependencies
 node_modules
+build
 
-#Build
-/build
-
-#Music downloads, todo: have its own folder
-*.mp3
-*.m4a
-*.opus
-*.mp4
-
-#Bot token
 confidential.json
-
-log*
+env

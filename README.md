@@ -1,9 +1,7 @@
-# dj-dog relaunch
+# dj-dog 3.0 🐋
 ## Notable changes:
-1. Now running on Linode/Ubuntu
-1. Google cloud stuff removed
-1. Removed extra entries from credentials.json
-1. Linter removed + indentation changed to 4-wide tabs (sorry)
+1. Back on Fedora 35
+1. Running as a Docker container
 
 ## Get it running:
 1. Clone (you'll need credentials)
@@ -11,6 +9,17 @@
 git clone https://github.com/Wllew4/dj-dog
 cd dj-dog
 ```
+2. Build image
+```sh
+make docker
+```
+3. Run image
+```sh
+make
+```
+
+
+
 1. Copy a valid credentials.json into root folder. You'll need:
 	* Discord Token
 	* Discord Client ID
