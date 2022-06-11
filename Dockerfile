@@ -1,6 +1,11 @@
+# Fedora 35 + Node 16 + Python + FFmpeg
+# Build as root, runs as dj
+
 FROM fedora:35
 
-ENV PATH="/root/bin:$PATH"
+RUN useradd dj
+ENV HOME=/home/dj
+ENV PATH="$HOME/bin:$PATH"
 WORKDIR /dj
 ENTRYPOINT yarn install && yarn tsc && yarn start
 
@@ -108,3 +113,5 @@ make && \
 make install
 RUN hash -d ffmpeg
 RUN rm -rf ~/ffmpeg_sources
+
+USER dj

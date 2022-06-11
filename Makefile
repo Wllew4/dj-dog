@@ -5,6 +5,6 @@ docker:
 	docker build -t djdog:3 .
 
 clean:
-	sudo rm -rf build
-	sudo rm -rf node_modules
+	rm -rf build
+	rm -rf node_modules
 	docker system prune -f
