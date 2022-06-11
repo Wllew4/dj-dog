@@ -4,29 +4,30 @@
 1. Running as a Docker container
 
 ## Get it running:
-1. Clone (you'll need credentials)
+1. Clone
 ```sh
 git clone https://github.com/Wllew4/dj-dog
 cd dj-dog
+```
+2. Create `env` file with credentials. Don't use quotation marks.
+```sh
+DISCORD_TOKEN=...
+DISCORD_CLIENT_ID=...
+YT_API_KEY=...
 ```
 2. Build image
 ```sh
 make docker
 ```
-3. Run image
+3. Run container
 ```sh
 make
 ```
-
-
-
-1. Copy a valid credentials.json into root folder. You'll need:
-	* Discord Token
-	* Discord Client ID
-	* YouTube API key
-1. Deploy (probably do this with tmux :P)
+4. Stop container
 ```sh
-# Installs additional dependencies and runs compiled js
-chmod +x ./deploy.sh
-. ./deploy.sh
+make stop
+```
+5. Clean up
+```sh
+make clean
 ```
