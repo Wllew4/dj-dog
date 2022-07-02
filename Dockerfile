@@ -4,7 +4,6 @@ FROM fedora:35
 
 ENV PATH="/root/bin:$PATH"
 WORKDIR /dj
-ENTRYPOINT yarn install && yarn tsc && yarn start
 
 RUN yum update -y
 
@@ -90,23 +89,29 @@ curl -O -L https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
 tar xjvf ffmpeg-snapshot.tar.bz2 && \
 cd ffmpeg && \
 PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure \
-  --prefix="$HOME/ffmpeg_build" \
-  --pkg-config-flags="--static" \
-  --extra-cflags="-I$HOME/ffmpeg_build/include" \
-  --extra-ldflags="-L$HOME/ffmpeg_build/lib" \
-  --extra-libs=-lpthread \
-  --extra-libs=-lm \
-  --bindir="$HOME/bin" \
-  --enable-gpl \
-  --enable-libfdk_aac \
-  --enable-libfreetype \
-  --enable-libmp3lame \
-  --enable-libopus \
-  --enable-libvpx \
-  --enable-libx264 \
-  --enable-libx265 \
-  --enable-nonfree && \
+	--prefix="$HOME/ffmpeg_build" \
+	--pkg-config-flags="--static" \
+	--extra-cflags="-I$HOME/ffmpeg_build/include" \
+	--extra-ldflags="-L$HOME/ffmpeg_build/lib" \
+	--extra-libs=-lpthread \
+	--extra-libs=-lm \
+	--bindir="$HOME/bin" \
+	--enable-gpl \
+	--enable-libfdk_aac \
+	--enable-libfreetype \
+	--enable-libmp3lame \
+	--enable-libopus \
+	--enable-libvpx \
+	--enable-libx264 \
+	--enable-libx265 \
+	--enable-nonfree && \
 make && \
 make install
 RUN hash -d ffmpeg
 RUN rm -rf ~/ffmpeg_sources
+
+# App
+COPY . /dj
+RUN yarn install && yarn tsc
+
+ENTRYPOINT yarn start
