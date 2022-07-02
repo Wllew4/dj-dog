@@ -1,33 +1,33 @@
-# dj-dog 3.0 🐋
+# dj-dog 3.1 🐋
 ## Notable changes:
-1. Back on Fedora 35
-1. Running as a Docker container
+1. youtube-dl -> yt-dlp
+	* No longer crashes on age restricted videos
+	* No longer crashes on shorts
+	* Begins playback faster
+1. Container hosts entire app, no need to clone any code
+1. Updated Makefile with additional dev tools
 
 ## Get it running:
-1. Clone
-```sh
-git clone https://github.com/Wllew4/dj-dog
-cd dj-dog
-```
-2. Create `env` file with credentials. Don't use quotation marks.
+1. Create `env` file with credentials. Don't use quotation marks.
 ```sh
 DISCORD_TOKEN=...
 DISCORD_CLIENT_ID=...
 YT_API_KEY=...
 ```
-2. Build image
+2. Pull image
 ```sh
-make docker
+docker pull ghcr.io/wllew4/djdog
 ```
 3. Run container
 ```sh
-make
+docker run -d --name dj-dog --env-file=env ghcr.io/wllew4/djdog
 ```
-4. Stop container
+4. Check logs
 ```sh
-make stop
+docker logs --follow dj-dog
 ```
-5. Clean up
+5. Stop and remove container
 ```sh
-make clean
+docker stop dj-dog
+docker rm dj-dog
 ```
