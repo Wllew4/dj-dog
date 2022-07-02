@@ -113,5 +113,6 @@ RUN rm -rf ~/ffmpeg_sources
 # App
 COPY . /dj
 RUN yarn install && yarn tsc
+RUN rm -r src
 
 ENTRYPOINT yarn start
