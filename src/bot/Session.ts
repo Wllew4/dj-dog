@@ -23,6 +23,7 @@ export default class Session
 {
 	public queue: Queue<Track>;
 	public currentTrack: Track | undefined;
+	public bPaused: boolean = false;
 
 	private timeoutTime: number = 60;
 	private timeout: NodeJS.Timeout;
@@ -115,6 +116,7 @@ export default class Session
 		{
 			this.replyVM.track = this.currentTrack;
 			this.replyVM.queue = this.queue;
+			this.replyVM.playing = !this.bPaused;
 		}
 	}
 
@@ -214,6 +216,8 @@ export default class Session
 	 */
 	public async pause(): Promise<boolean>
 	{
+		this.bPaused = !this.bPaused;
+		this.updateVM();
 		return this.audioManager.pause();
 	}
 };

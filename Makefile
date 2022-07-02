@@ -22,7 +22,7 @@ clean:
 dev:
 	docker run --rm -ti --name dj-dev \
 		--env-file=env \
-		-v $(pwd):/dj-dev \
+		-v $(shell pwd):/dj-dev \
 		-w /dj-dev \
 		--entrypoint /bin/bash \
 		ghcr.io/wllew4/djdog
