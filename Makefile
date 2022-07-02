@@ -1,5 +1,5 @@
 run:
-	docker run -d --name dj-dog --env-file=env djdog:3.1
+	docker run -d --name dj-dog --env-file=env ghcr.io/wllew4/djdog:3.1
 
 stop:
 	docker stop dj-dog
