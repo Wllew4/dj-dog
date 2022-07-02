@@ -1,4 +1,4 @@
-import youtubedl, { YtResponse } from 'youtube-dl-exec';
+import youtubedl, { YtResponse } from 'yt-dlp-exec';
 
 class Track
 {
@@ -12,7 +12,7 @@ class Track
 		public url: string
 	)
 	{
-		this.info = youtubedl(this.url, { dumpSingleJson:true, noCheckCertificate:true, callHome:false, forceIpv4:true });
+		this.info = youtubedl(this.url, { dumpSingleJson:true, noCheckCertificate:true, forceIpv4:true });
 	}
 };
 

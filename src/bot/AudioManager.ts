@@ -7,7 +7,7 @@ import {
 	createAudioResource,
 	NoSubscriberBehavior,
 	StreamType } from '@discordjs/voice';
-import { exec } from 'youtube-dl-exec';
+import { exec } from 'yt-dlp-exec';
 import { Converter } from 'ffmpeg-stream';
 import { ExecaChildProcess } from 'execa';
 import { Readable } from 'stream';
@@ -46,7 +46,6 @@ export default class AudioManager
 					format:'bestaudio/worst',
 					output:'-',
 					noCheckCertificate:true,
-					callHome:false,
 					forceIpv4:true
 				});
 			if (!this.downloader.stdout) throw Error('Download process has no stdout???');
