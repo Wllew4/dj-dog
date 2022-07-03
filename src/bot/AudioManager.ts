@@ -6,19 +6,15 @@ import {
 	createAudioPlayer,
 	createAudioResource,
 	NoSubscriberBehavior,
+	joinVoiceChannel,
+	entersState,
+	VoiceConnectionStatus,
+	VoiceConnection,
 	StreamType } from '@discordjs/voice';
 import { exec } from 'yt-dlp-exec';
 import { Converter } from 'ffmpeg-stream';
 import { ExecaChildProcess } from 'execa';
 import { Readable } from 'stream';
-
-import {
-	joinVoiceChannel,
-	entersState,
-	VoiceConnectionStatus,
-	VoiceConnection,
-	// AudioPlayerStatus
-} from '@discordjs/voice';
 import { StageChannel, VoiceChannel } from 'discord.js';
 
 export default class AudioManager
@@ -26,9 +22,8 @@ export default class AudioManager
 	private downloader?: ExecaChildProcess;
 	public audioPlayer: AudioPlayer;
 	
-	private paused: boolean = false;
-
-	
+	private _paused: boolean = false;
+	public get paused() { return this._paused; }
 
 	private connection: VoiceConnection;
 	public controller: AbortController;
@@ -117,6 +112,14 @@ export default class AudioManager
 	{
 		return this.audioPlayer.state.status == AudioPlayerStatus.Idle;
 	}
+	
+	/**
+	 * @returns true if anything is currently playing
+	 */
+	public isBuffering(): boolean
+	{
+		return this.audioPlayer.state.status == AudioPlayerStatus.Buffering;
+	}
 
 	/**
 	 * Pauses playback
@@ -126,23 +129,31 @@ export default class AudioManager
 	{
 		if(this.paused)
 		{
-			this.paused = false;
+			this._paused = false;
 			this.audioPlayer.unpause();
 		}
 		else
 		{
-			this.paused = true;
+			this._paused = true;
 			this.audioPlayer.pause();
 		}
 		return this.paused;
 	}
 
 	/**
-	 * Stops playback
+	 * Cut off current song playback
 	 */
-	public stop()
+	public finishSong()
 	{
 		this.audioPlayer.stop();
+	}
+
+	/**
+	 * Kill VC connection
+	 */
+	public kill()
+	{
+		this.finishSong();
 		this.killDownloader();
 		this.connection.destroy();
 	}

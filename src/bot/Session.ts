@@ -18,7 +18,6 @@ export default class Session
 {
 	public queue: Queue<Track>;
 	public currentTrack: Track | undefined;
-	public bPaused: boolean = false;
 
 	private timeoutTime: number = 60;
 	private timeout: NodeJS.Timeout;
@@ -95,7 +94,7 @@ export default class Session
 		{
 			this.replyVM.track = this.currentTrack;
 			this.replyVM.queue = this.queue;
-			this.replyVM.playing = !this.bPaused;
+			this.replyVM.paused = this.audioManager.paused;
 		}
 	}
 
@@ -134,7 +133,7 @@ export default class Session
 	{
 		try
 		{
-			this.audioManager.stop();
+			this.audioManager.kill();
 		}
 		catch (e)
 		{
@@ -164,11 +163,13 @@ export default class Session
 	 * @param i Index for removal
 	 * @returns the Track removed
 	 */
-	public remove(i: number): Track
+	public async remove(i: number): Promise<string>
 	{
-		let out = this.queue.remove(i);
+		let removed = this.queue.remove(i-1);
 		this.updateVM();
-		return out;
+		if(removed)
+			return `Removed ${(await removed.info).title} from the queue!`;
+		return `Failed to remove index ${i} from the queue`;
 	}
 
 	/**
@@ -177,19 +178,23 @@ export default class Session
 	 */
 	public async skip(): Promise<boolean>
 	{
-		this.audioManager.stop();
+		if(this.audioManager.isIdle())
+			return false;
+		this.audioManager.finishSong();
 		this.updateVM();
-		return !this.queue.isEmpty();
+		return true;
 	}
 
 	/**
 	 * Pauses/unpauses playback
 	 * @returns true if paused, false if unpaused
 	 */
-	public async pause(): Promise<boolean>
+	public async pause(): Promise<string>
 	{
-		this.bPaused = !this.bPaused;
+		if(this.audioManager.isIdle() || this.audioManager.isBuffering())
+			return 'Not currently playing anything';
+		const paused = this.audioManager.pause();
 		this.updateVM();
-		return this.audioManager.pause();
+		return (paused ? 'Paused': 'Resumed') + ' playback.';
 	}
 };

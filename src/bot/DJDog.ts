@@ -1,7 +1,7 @@
-import { refreshSlashCommands } from './CommandManager';
 import Session from './Session';
 import { Secrets } from '../Secrets';
-
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v9';
 import {
 	Client,
 	CommandInteraction,
@@ -13,19 +13,10 @@ import {
 	VoiceChannel
 } from 'discord.js';
 
-function replyTimeout(i: CommandInteraction, msg: string)
-{
-	i.reply(msg);
-	setTimeout(()=>{i.deleteReply()}, 5000);
-}
-
 export default class DJDog
 {
 	protected client: Client;
-	private sessions: Session[]		= [];
-
-	//Command initialization methods
-	private refreshSlashCommands	= refreshSlashCommands;
+	private sessions: Session[]	= [];
 
 	/**
 	 * Bot class, initializes commands and manages sessions.
@@ -109,12 +100,12 @@ export default class DJDog
 		const vc = i.member.voice.channel;
 		if(!vc)
 		{
-			replyTimeout(i, 'You are not in a voice channel!');
+			DJDog.replyTimeout(i, 'You are not in a voice channel!');
 			return;
 		}
 		let session = this.getSession(vc);
 
-		// Commands that DO require a session
+		// Commands that can begin a session
 		switch(i.commandName)
 		{
 			case 'join':
@@ -124,17 +115,7 @@ export default class DJDog
 					i.reply(`Joining voice channel: ${vc}`);
 					break;
 				}
-				replyTimeout(i, `A session already exists in ${vc}`)
-				break;
-
-			case 'leave':
-				if(session === undefined)
-				{
-					replyTimeout(i, `No active session exists in ${vc}`);
-					break;
-				}
-				this.endSession(session);
-				replyTimeout(i, `Leaving voice channel: ${vc}`);
+				DJDog.replyTimeout(i, `A session already exists in ${vc}`)
 				break;
 
 			case 'play':
@@ -150,31 +131,74 @@ export default class DJDog
 				if(!newSession)
 					setTimeout(()=>{i.deleteReply()}, 5000);
 				break;
-
-			// case 'remove':
-			// 	const index = i.options.getInteger('index', true);
-			// 	const removed = session.remove(index - 1);
-			// 	i.reply(`Removed ${(await removed.info).title} from the queue!`);
-			// 	setTimeout(()=>{i.deleteReply()}, 5000);
-			// 	break;
-
-			// case 'skip':
-			// 	const skipped = await session.skip();
-			// 	if(skipped)
-			// 		i.reply('Skipped!');
-			// 	else
-			// 		i.reply('The queue is empty!');
-			// 	setTimeout(()=>{i.deleteReply()}, 5000);
-			// 	break;
-
-			// case 'pause':
-			// 	const isPaused: boolean = await session.pause();
-			// 	i.reply(
-			// 		(isPaused ? 'Paused': 'Unpaused')
-			// 			+ ' playback.'
-			// 	);
-			// 	setTimeout(()=>{i.deleteReply()}, 5000);
-			// 	break;
 		}
+
+		if(session === undefined)
+		{
+			DJDog.replyTimeout(i, `No active session exists in ${vc}`);
+			return;
+		}
+
+		// Commands that require an active session
+		switch(i.commandName)
+		{
+			case 'leave':
+				this.endSession(session);
+				DJDog.replyTimeout(i, `Leaving voice channel: ${vc}`);
+				break;
+
+			case 'remove':
+				const index = i.options.getInteger('index', true);
+				DJDog.replyTimeout(i, await session.remove(index))
+				break;
+
+			case 'skip':
+				const skipped = await session.skip();
+				if(skipped)
+					i.reply('Skipped!');
+				else
+					i.reply('The queue is empty!');
+				setTimeout(()=>{i.deleteReply()}, 5000);
+				break;
+
+			case 'pause':
+				DJDog.replyTimeout(i, await session.pause());
+				break;
+		}
+	}
+
+	/**
+	 * Refreshes the / commands on a given DJDog instance
+	 * @param this The owning DJDog object
+	 */
+	private async refreshSlashCommands(this: DJDog)
+	{
+		const rest = new REST({ version: '9' }).setToken(this.secrets.token);
+
+		try
+		{
+			const commands = require('../../commands.json');
+
+			await rest.put(
+				Routes.applicationCommands(
+					this.secrets.client_id,
+				),
+				{ body: commands });
+		}
+		catch (e)
+		{
+			console.error(e);
+		}
+	}
+
+	/**
+	 * Reply and delete
+	 * @param i Interaction to respond to
+	 * @param msg Message to respond with
+	 */
+	private static replyTimeout(i: CommandInteraction, msg: string)
+	{
+		i.reply(msg);
+		setTimeout(()=>{i.deleteReply()}, 5000);
 	}
 };

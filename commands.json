@@ -45,6 +45,6 @@
 	},
 	{
 		"name": "pause",
-		"description": "Pause the current track."
+		"description": "Pause/Resume the current track."
 	}
 ]

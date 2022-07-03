@@ -31,8 +31,10 @@ export default class Queue<T>
 	 * @param i the index to remove
 	 * @returns the value removed
 	 */
-	public remove(i: number): T
+	public remove(i: number): T | null
 	{
+		if(i < 0 || i > this.length())
+			return null;
 		let out = this.data[i];
 		this.data.splice(i, 1);
 		return out;

@@ -9,7 +9,7 @@ import Track from "./Track";
 class ReplyVM {
 	private _track: Track | undefined = undefined;
 	private _queue: Queue<Track> | undefined = undefined;
-	private _isPlaying: boolean | undefined = true;
+	private _paused: boolean | undefined = false;
 	public get track(): Track | undefined {
 		return this._track;
 	}
@@ -24,11 +24,11 @@ class ReplyVM {
 		this._queue = value;
 		this.render();
 	}
-	public get playing(): boolean | undefined {
-		return this._isPlaying;
+	public get paused(): boolean | undefined {
+		return this._paused;
 	}
-	public set playing(value: boolean | undefined) {
-		this._isPlaying = value;
+	public set paused(value: boolean | undefined) {
+		this._paused = value;
 		this.render();
 	}
 
@@ -53,7 +53,7 @@ class ReplyVM {
 			let thumb = null;
 			if (info.thumbnail) thumb = info.thumbnails[0];
 			this._replyMessage.edit({
-				content: this._isPlaying ? `⯈ Playing` : '⏸︎ Paused',
+				content: !this.paused ? `⯈ Playing` : '⏸︎ Paused',
 				embeds: [
 					{
 						author:{
