@@ -1,6 +1,6 @@
 import AudioManager from './AudioManager';
 import Track from './Track';
-import YouTubeSearchTrack from '../yt/SearchTrack';
+import YTSearchTrack from '../yt/SearchTrack';
 import ReplyVM from './ReplyVM';
 import Queue from './Queue';
 
@@ -115,7 +115,7 @@ export default class Session
 	 */
 	public async play(query: string): Promise<string>
 	{
-		let track: Track | null = await YouTubeSearchTrack.getTrack(query);
+		let track: Track | null = await YTSearchTrack.getTrack(query);
 		if(track == null)
 			return `Could not find a video for query: ${query}`;
 

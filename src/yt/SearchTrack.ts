@@ -1,9 +1,9 @@
 import getSecrets from '../Secrets';
 import fetch from 'cross-fetch';
 import Track from '../bot/Track';
-import YouTubeSearchInfo from './SearchInfo';
+import YTSearchInfo from './SearchInfo';
 
-export default class YouTubeSearchTrack
+export default class YTSearchTrack
 {
 	/**
 	 * Find a Track based on a query
@@ -13,20 +13,20 @@ export default class YouTubeSearchTrack
 	public static async getTrack(query: string): Promise<Track | null>
 	{
 		let url: string | null;
-		if (YouTubeSearchTrack.isValidUrl(query))
+		if (YTSearchTrack.isValidUrl(query))
 			url = query;
 		else
-			url = await YouTubeSearchTrack.search(query);
+			url = await YTSearchTrack.search(query);
 		
 		if(url == null)
 			return null;
 		
-		return await Track.new(url, YouTubeSearchInfo.getInfo(url));
+		return await Track.new(url, YTSearchInfo.getInfo(url));
 	}
 
 	private static async search (query: string): Promise<string | null> {
 
-		console.log(`Searching for: \"${query}\"...`);
+		console.log(`Searching for: "${query}"...`);
 
 		const { youtube_api_key } = await getSecrets();
 		const res = await fetch(`//www.googleapis.com/youtube/v3/search?key=${youtube_api_key}&q=${query}&maxResults=1&type=video&videoCategoryId=10&safeSearch=none`, { method: 'GET' });

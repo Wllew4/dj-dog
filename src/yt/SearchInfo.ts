@@ -1,6 +1,6 @@
 import youtubedl, { YtResponse } from 'yt-dlp-exec';
 
-export default class YouTubeSearchInfo
+export default class YTSearchInfo
 {
 	public static async getInfo(url: string): Promise<YtResponse>
 	{

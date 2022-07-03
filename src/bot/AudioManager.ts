@@ -4,26 +4,19 @@ import {
 	AudioPlayer,
 	AudioPlayerStatus,
 	createAudioPlayer,
-	createAudioResource,
 	NoSubscriberBehavior,
 	joinVoiceChannel,
 	entersState,
 	VoiceConnectionStatus,
-	VoiceConnection,
-	StreamType } from '@discordjs/voice';
-import { exec } from 'yt-dlp-exec';
-import { Converter } from 'ffmpeg-stream';
-import { ExecaChildProcess } from 'execa';
-import { Readable } from 'stream';
+	VoiceConnection} from '@discordjs/voice';
 import { StageChannel, VoiceChannel } from 'discord.js';
+import YTAudioStream from '../yt/Stream';
 
 export default class AudioManager
 {
 	private _paused: boolean = false;
 	public get paused() { return this._paused; }
 
-
-	private downloader?: ExecaChildProcess;
 	private audioPlayer: AudioPlayer;
 
 	private connection: VoiceConnection;
@@ -66,23 +59,24 @@ export default class AudioManager
 	public async stream(track: Track)
 	{
 		try{
-			// if audio-only formats are offered, download the highest quality one
-			// else fall back to the worst video+audio format
-			// output to process stdout so we can stream this
-			this.downloader = exec(track.url,
-				{
-					format:'bestaudio/worst',
-					output:'-',
-					noCheckCertificate:true,
-					forceIpv4:true
-				});
-			if (!this.downloader.stdout) throw Error('Download process has no stdout???');
-			// no joke, downloader will quit if nobody listens to its errors :(
-			// Logging here outputs transferred buffers lol
-			this.downloader.stderr?.on('data', (e)=>{ /* console.log(e) */});
+			// // if audio-only formats are offered, download the highest quality one
+			// // else fall back to the worst video+audio format
+			// // output to process stdout so we can stream this
+			// this.downloader = exec(track.url,
+			// 	{
+			// 		format:'bestaudio/worst',
+			// 		output:'-',
+			// 		noCheckCertificate:true,
+			// 		forceIpv4:true
+			// 	});
+			// if (!this.downloader.stdout) throw Error('Download process has no stdout???');
+			// // no joke, downloader will quit if nobody listens to its errors :(
+			// // Logging here outputs transferred buffers lol
+			// this.downloader.stderr?.on('data', (e)=>{ /* console.log(e) */});
 
-			const audioStream = this.convert(this.downloader.stdout);
-			const resource = createAudioResource(audioStream, { inputType: StreamType.OggOpus });
+			// const audioStream = this.convert(this.downloader.stdout);
+			// const resource = createAudioResource(audioStream, { inputType: StreamType.OggOpus });
+			const resource = YTAudioStream.createResource(track);
 			this.audioPlayer.play(resource);
 		}
 		catch(err){
@@ -139,34 +133,7 @@ export default class AudioManager
 	public kill()
 	{
 		this.finishSong();
-		this.killDownloader();
+		YTAudioStream.killDownloader();
 		this.connection.destroy();
-	}
-
-	/**
-	 * Prepares a new converter
-	 * @param mediaStream The incoming audio/video stream
-	 * @returns The converted audio stream
-	 */
-	private convert(mediaStream:Readable): Readable {
-		const converter = new Converter();
-		const output = converter.createOutputStream({
-			f:'opus',
-			acodec: 'libopus',
-			'b:a': 128000,
-			application:'audio'
-		});
-		mediaStream.pipe(converter.createInputStream({}));
-		converter.run();
-		return output;
-	}
-
-	/**
-	 * Stop streaming
-	 */
-	private killDownloader(): void {
-		if (this.downloader && !this.downloader.killed) {
-			this.downloader.kill('SIGTERM');
-		}
 	}
 };
