@@ -1,19 +1,18 @@
-import youtubedl, { YtResponse } from 'yt-dlp-exec';
+import { YtResponse } from 'yt-dlp-exec';
 
-class Track
+export default class Track
 {
-	public readonly info: Promise<YtResponse>;
-	
 	/**
 	 * Constructs a new track
 	 * @param url The song's url
 	 */
-	public constructor(
-		public url: string
-	)
+	public static async new(url: string, info: YtResponse): Promise<Track>
 	{
-		this.info = youtubedl(this.url, { dumpSingleJson:true, noCheckCertificate:true, forceIpv4:true });
+		return new Track(url, info);
 	}
-};
 
-export default Track;
+	private constructor(
+		public readonly url: string,
+		public readonly info: YtResponse
+	) {}
+};

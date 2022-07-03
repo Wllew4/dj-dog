@@ -63,7 +63,7 @@ export default class DJDog
 	 */
 	private startSession(vChannel: VoiceChannel | StageChannel, i: Promise<Message | APIMessage>): Session
 	{
-		return this.sessions[this.sessions.push(new Session(vChannel, this, new ReplyVM(i as Promise<Message>))) - 1];
+		return this.sessions[this.sessions.push(new Session(vChannel, this.endSession, new ReplyVM(i as Promise<Message>))) - 1];
 	}
 
 	/**

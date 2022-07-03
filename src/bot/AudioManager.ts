@@ -19,14 +19,15 @@ import { StageChannel, VoiceChannel } from 'discord.js';
 
 export default class AudioManager
 {
-	private downloader?: ExecaChildProcess;
-	public audioPlayer: AudioPlayer;
-	
 	private _paused: boolean = false;
 	public get paused() { return this._paused; }
 
+
+	private downloader?: ExecaChildProcess;
+	private audioPlayer: AudioPlayer;
+
 	private connection: VoiceConnection;
-	public controller: AbortController;
+	private controller: AbortController;
 	private signal: AbortSignal;
 
 	/**
@@ -59,7 +60,8 @@ export default class AudioManager
 	}
 
 	/**
-	 * Gets the track from the top of the queue and streams it
+	 * Streams a track
+	 * @param track the track to stream
 	 */
 	public async stream(track: Track)
 	{
@@ -78,6 +80,7 @@ export default class AudioManager
 			// no joke, downloader will quit if nobody listens to its errors :(
 			// Logging here outputs transferred buffers lol
 			this.downloader.stderr?.on('data', (e)=>{ /* console.log(e) */});
+
 			const audioStream = this.convert(this.downloader.stdout);
 			const resource = createAudioResource(audioStream, { inputType: StreamType.OggOpus });
 			this.audioPlayer.play(resource);
@@ -85,24 +88,6 @@ export default class AudioManager
 		catch(err){
 			console.error(err);
 		}
-	}
-
-	/**
-	 * Prepares a new converter
-	 * @param mediaStream The incoming audio/video stream
-	 * @returns The converted audio stream
-	 */
-	private convert(mediaStream:Readable): Readable {
-		const converter = new Converter();
-		const output = converter.createOutputStream({
-			f:'opus',
-			acodec: 'libopus',
-			'b:a': 128000,
-			application:'audio'
-		});
-		mediaStream.pipe(converter.createInputStream({}));
-		converter.run();
-		return output;
 	}
 
 	/**
@@ -159,7 +144,25 @@ export default class AudioManager
 	}
 
 	/**
-	 * Stop streaming from YT-DL
+	 * Prepares a new converter
+	 * @param mediaStream The incoming audio/video stream
+	 * @returns The converted audio stream
+	 */
+	private convert(mediaStream:Readable): Readable {
+		const converter = new Converter();
+		const output = converter.createOutputStream({
+			f:'opus',
+			acodec: 'libopus',
+			'b:a': 128000,
+			application:'audio'
+		});
+		mediaStream.pipe(converter.createInputStream({}));
+		converter.run();
+		return output;
+	}
+
+	/**
+	 * Stop streaming
 	 */
 	private killDownloader(): void {
 		if (this.downloader && !this.downloader.killed) {

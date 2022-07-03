@@ -1,15 +1,19 @@
 import AudioManager from './AudioManager';
 import Track from './Track';
-import SearchManager from './SearchManager';
+import YouTubeSearchTrack from '../yt/SearchTrack';
+import ReplyVM from './ReplyVM';
+import Queue from './Queue';
 
 import {
 	StageChannel,
 	VoiceChannel
 } from 'discord.js';
-import DJDog from './DJDog';
-import ReplyVM from './ReplyVM';
-import Queue from './Queue';
 import { AudioPlayerStatus } from '@discordjs/voice';
+
+interface IEndFunction
+{
+	(session: Session): void
+}
 
 export default class Session
 {
@@ -25,7 +29,7 @@ export default class Session
 	 * Starts a new session.
 	 * @param vChannel The voice channel associated with the session
 	 */
-	public constructor(public vChannel: VoiceChannel | StageChannel, public dj: DJDog, public replyVM: ReplyVM)
+	public constructor(public vChannel: VoiceChannel | StageChannel, private endFunction: IEndFunction, public replyVM: ReplyVM)
 	{
 		this.queue = new Queue<Track>();
 
@@ -33,7 +37,7 @@ export default class Session
 		this.startTimeout();
 
 		this.audioManager = new AudioManager(vChannel);
-		this.audioManager.join()
+		this.audioManager.join();
 
 		// @ts-ignore
 		this.audioManager.audioPlayer.on("stateChange", (oldState, newState) => {
@@ -85,7 +89,7 @@ export default class Session
 	private startTimeout()
 	{
 		this.timeout = setTimeout(async () => {
-			this.dj.endSession(this);
+			this.endFunction(this);
 			this.replyVM.remove();
 		}, this.timeoutTime * 1000);
 	}
@@ -111,7 +115,7 @@ export default class Session
 	 */
 	public async play(query: string): Promise<string>
 	{
-		let track: Track | null = await SearchManager.get(query);
+		let track: Track | null = await YouTubeSearchTrack.getTrack(query);
 		if(track == null)
 			return `Could not find a video for query: ${query}`;
 

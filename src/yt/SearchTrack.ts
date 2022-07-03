@@ -1,18 +1,27 @@
 import getSecrets from '../Secrets';
 import fetch from 'cross-fetch';
-import Track from './Track';
+import Track from '../bot/Track';
+import YouTubeSearchInfo from './SearchInfo';
 
-export default class SearchManager
+export default class YouTubeSearchTrack
 {
-	public static async get(query: string): Promise<Track | null>
+	/**
+	 * Find a Track based on a query
+	 * @param query Search term or URL to video
+	 * @returns the requested Track, or null if not found
+	 */
+	public static async getTrack(query: string): Promise<Track | null>
 	{
-		if (SearchManager.isValidUrl(query))
-			return new Track(query);
-
-		let song = await SearchManager.search(query);
-		if(song == null)
+		let url: string | null;
+		if (YouTubeSearchTrack.isValidUrl(query))
+			url = query;
+		else
+			url = await YouTubeSearchTrack.search(query);
+		
+		if(url == null)
 			return null;
-		return new Track(song);
+		
+		return await Track.new(url, await YouTubeSearchInfo.getInfo(url));
 	}
 
 	private static async search (query: string): Promise<string | null> {
