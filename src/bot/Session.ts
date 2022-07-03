@@ -76,12 +76,7 @@ export default class Session
 
 	private async updateVM()
 	{
-		if(this.replyVM)
-		{
-			(await this.replyVM).track = this.currentTrack;
-			(await this.replyVM).queue = this.queue;
-			(await this.replyVM).paused = this.audioManager.paused;
-		}
+		this.replyVM.render(this.currentTrack, this.queue, this.audioManager.paused);
 	}
 
 	/**
@@ -91,7 +86,7 @@ export default class Session
 	{
 		this.timeout = setTimeout(async () => {
 			this.dj.endSession(this);
-			(await this.replyVM).remove();
+			this.replyVM.remove();
 		}, this.timeoutTime * 1000);
 	}
 

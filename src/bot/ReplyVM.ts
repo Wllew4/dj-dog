@@ -3,57 +3,35 @@ import Queue from "./Queue";
 import Track from "./Track";
 
 /**
- * Viewmodel representing the current track.
+ * ViewModel representing the current track.
  * Updates a set Discord message every time a setter is used.
  */
 class ReplyVM {
-	private _track: Track | undefined = undefined;
-	private _queue: Queue<Track> | undefined = undefined;
-	private _paused: boolean | undefined = false;
-	public get track(): Track | undefined {
-		return this._track;
-	}
-	public set track(value: Track | undefined) {
-		this._track = value;
-		this.render();
-	}
-	public get queue(): Queue<Track> | undefined {
-		return this._queue;
-	}
-	public set queue(value: Queue<Track> | undefined) {
-		this._queue = value;
-		this.render();
-	}
-	public get paused(): boolean | undefined {
-		return this._paused;
-	}
-	public set paused(value: boolean | undefined) {
-		this._paused = value;
-		this.render();
-	}
-
 	/**
-	 * 
 	 * @param _replyMessage The reply to the summoning interaction, obtained after replying from Interaction.fetchReply()
 	 */
-	constructor(private readonly _replyMessage: Promise<Message>) {
-	}
-	public async render(): Promise<void>{
+	constructor(private readonly _replyMessage: Promise<Message>) {}
+
+	/**
+	 * Update ViewModel
+	 */
+	public async render(track: Track | undefined, queue: Queue<Track> | undefined, paused: boolean | undefined): Promise<void>
+	{
 		// Update Queue
 		let queueS = "";
-		if(this._queue)
+		if(queue)
 		{
-			for(let i = 0; i < this._queue.length(); i++)
-				queueS += `${i+1}. [${(await this._queue.at(i).info).title}](${(await this._queue.at(i).info).webpage_url})\n`;
+			for(let i = 0; i < queue.length(); i++)
+				queueS += `${i+1}. [${(await queue.at(i).info).title}](${(await queue.at(i).info).webpage_url})\n`;
 		}
 
 		// Update current track
-		if (this._track){
-			const info = await this._track.info;
+		if (track){
+			const info = await track.info;
 			let thumb = null;
 			if (info.thumbnail) thumb = info.thumbnails[0];
 			(await this._replyMessage).edit({
-				content: !this.paused ? `⯈ Playing` : '⏸︎ Paused',
+				content: !paused ? `⯈ Playing` : '⏸︎ Paused',
 				embeds: [
 					{
 						author:{
@@ -89,7 +67,8 @@ class ReplyVM {
 		{
 			(await this._replyMessage).edit("Nothing playing right now, type /play <song> to add a song to the queue.");
 		}
-	};
+	}
+
 	public async remove()
 	{
 		(await this._replyMessage).delete();
