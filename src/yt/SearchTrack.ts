@@ -21,7 +21,7 @@ export default class YouTubeSearchTrack
 		if(url == null)
 			return null;
 		
-		return await Track.new(url, await YouTubeSearchInfo.getInfo(url));
+		return await Track.new(url, YouTubeSearchInfo.getInfo(url));
 	}
 
 	private static async search (query: string): Promise<string | null> {
