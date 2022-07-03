@@ -3,14 +3,11 @@ import Track from './Track';
 import SearchManager from './SearchManager';
 
 import {
-	CommandInteraction,
-	Message,
 	StageChannel,
 	VoiceChannel
 } from 'discord.js';
 import DJDog from './DJDog';
 import ReplyVM from './ReplyVM';
-import { APIMessage } from 'discord.js/node_modules/discord-api-types';
 import Queue from './Queue';
 import { AudioPlayerStatus } from '@discordjs/voice';
 
@@ -24,18 +21,11 @@ export default class Session
 
 	private audioManager: AudioManager;
 
-	public static async new(vChannel: VoiceChannel | StageChannel, dj: DJDog, i: Promise<Message | APIMessage>): Promise<Session>
-	{
-		let out = new Session(vChannel, dj, ReplyVM.new(i as Promise<Message>));
-		await out.audioManager.join()
-		return out;
-	}
-
 	/**
 	 * Starts a new session.
 	 * @param vChannel The voice channel associated with the session
 	 */
-	private constructor(public vChannel: VoiceChannel | StageChannel, public dj: DJDog, public replyVM: Promise<ReplyVM>)
+	public constructor(public vChannel: VoiceChannel | StageChannel, public dj: DJDog, public replyVM: ReplyVM)
 	{
 		this.queue = new Queue<Track>();
 
@@ -43,6 +33,7 @@ export default class Session
 		this.startTimeout();
 
 		this.audioManager = new AudioManager(vChannel);
+		this.audioManager.join()
 
 		// @ts-ignore
 		this.audioManager.audioPlayer.on("stateChange", (oldState, newState) => {

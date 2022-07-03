@@ -32,16 +32,11 @@ class ReplyVM {
 		this.render();
 	}
 
-	public static async new(msg: Promise<Message>)
-	{
-		return new ReplyVM(await msg)
-	}
-
 	/**
 	 * 
 	 * @param _replyMessage The reply to the summoning interaction, obtained after replying from Interaction.fetchReply()
 	 */
-	constructor(private readonly _replyMessage: Message) {
+	constructor(private readonly _replyMessage: Promise<Message>) {
 	}
 	public async render(): Promise<void>{
 		// Update Queue
@@ -57,7 +52,7 @@ class ReplyVM {
 			const info = await this._track.info;
 			let thumb = null;
 			if (info.thumbnail) thumb = info.thumbnails[0];
-			this._replyMessage.edit({
+			(await this._replyMessage).edit({
 				content: !this.paused ? `⯈ Playing` : '⏸︎ Paused',
 				embeds: [
 					{
@@ -92,12 +87,12 @@ class ReplyVM {
 		}
 		else
 		{
-			this._replyMessage.edit("Nothing playing right now, type /play <song> to add a song to the queue.");
+			(await this._replyMessage).edit("Nothing playing right now, type /play <song> to add a song to the queue.");
 		}
 	};
-	public remove()
+	public async remove()
 	{
-		this._replyMessage.delete();
+		(await this._replyMessage).delete();
 	}
 }
 

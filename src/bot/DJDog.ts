@@ -15,6 +15,7 @@ import {
 	VoiceChannel
 } from 'discord.js';
 import { APIMessage } from 'discord.js/node_modules/discord-api-types';
+import ReplyVM from './ReplyVM';
 
 export default class DJDog
 {
@@ -60,9 +61,9 @@ export default class DJDog
 	 * @param vChannel VoiceChannel for session
 	 * @returns new Session
 	 */
-	private async startSession(vChannel: VoiceChannel | StageChannel, i: Promise<Message | APIMessage>): Promise<Session>
+	private startSession(vChannel: VoiceChannel | StageChannel, i: Promise<Message | APIMessage>): Session
 	{
-		return this.sessions[this.sessions.push(await Session.new(vChannel, this, i)) - 1];
+		return this.sessions[this.sessions.push(new Session(vChannel, this, new ReplyVM(i as Promise<Message>))) - 1];
 	}
 
 	/**
@@ -149,7 +150,7 @@ export default class DJDog
 			case 'join':
 				if(session === undefined)
 				{
-					await this.startSession(vc, i.fetchReply());
+					this.startSession(vc, i.fetchReply());
 					i.reply(`Joining voice channel: ${vc}`);
 					break;
 				}
@@ -160,7 +161,7 @@ export default class DJDog
 				let bNewSession = false;
 				if(session === undefined)
 				{
-					session = await this.startSession(vc, i.fetchReply());
+					session = this.startSession(vc, i.fetchReply());
 					bNewSession = true;
 				}
 				const query = i.options.getString('song', true);
