@@ -22,25 +22,20 @@ export default class Session
 	private timeoutTime: number = 60;
 	private timeout: NodeJS.Timeout;
 
-	// Viewmodel for the "Currently playing" reply message
-	public replyVM?: ReplyVM;
-
 	private audioManager: AudioManager;
 
-	async linkVM(pReply: Promise<Message|APIMessage>)
+	public static async new(vChannel: VoiceChannel | StageChannel, dj: DJDog, i: Promise<Message | APIMessage>): Promise<Session>
 	{
-		const reply = await pReply;
-		if (reply instanceof Message)
-		{
-			this.replyVM = new ReplyVM(reply);
-		}
+		let out = new Session(vChannel, dj, ReplyVM.new(i as Promise<Message>));
+		await out.audioManager.join()
+		return out;
 	}
 
 	/**
 	 * Starts a new session.
 	 * @param vChannel The voice channel associated with the session
 	 */
-	constructor(public vChannel: VoiceChannel | StageChannel, public dj: DJDog)
+	private constructor(public vChannel: VoiceChannel | StageChannel, public dj: DJDog, public replyVM: Promise<ReplyVM>)
 	{
 		this.queue = new Queue<Track>();
 
@@ -88,13 +83,13 @@ export default class Session
 		this.updateVM();
 	}
 
-	private updateVM()
+	private async updateVM()
 	{
 		if(this.replyVM)
 		{
-			this.replyVM.track = this.currentTrack;
-			this.replyVM.queue = this.queue;
-			this.replyVM.paused = this.audioManager.paused;
+			(await this.replyVM).track = this.currentTrack;
+			(await this.replyVM).queue = this.queue;
+			(await this.replyVM).paused = this.audioManager.paused;
 		}
 	}
 
@@ -103,27 +98,10 @@ export default class Session
 	 */
 	private startTimeout()
 	{
-		this.timeout = setTimeout(() => {
+		this.timeout = setTimeout(async () => {
 			this.dj.endSession(this);
-			this.replyVM?.remove();
+			(await this.replyVM).remove();
 		}, this.timeoutTime * 1000);
-	}
-
-	/**
-	 * Connects the bot to its voice channel
-	 */
-	public async join(i: CommandInteraction)
-	{
-		try
-		{
-			this.audioManager.join()
-			this.linkVM(i.fetchReply());
-		}
-		catch (e)
-		{
-			this.audioManager.controller.abort();
-			console.error(e);
-		}
 	}
 
 	/**

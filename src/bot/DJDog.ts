@@ -9,10 +9,12 @@ import {
 	GuildMember,
 	Intents,
 	Interaction,
+	Message,
 	StageChannel,
 	TextChannel,
 	VoiceChannel
 } from 'discord.js';
+import { APIMessage } from 'discord.js/node_modules/discord-api-types';
 
 export default class DJDog
 {
@@ -58,9 +60,9 @@ export default class DJDog
 	 * @param vChannel VoiceChannel for session
 	 * @returns new Session
 	 */
-	private startSession(vChannel: VoiceChannel | StageChannel): Session
+	private async startSession(vChannel: VoiceChannel | StageChannel, i: Promise<Message | APIMessage>): Promise<Session>
 	{
-		return this.sessions[this.sessions.push(new Session(vChannel, this)) - 1];
+		return this.sessions[this.sessions.push(await Session.new(vChannel, this, i)) - 1];
 	}
 
 	/**
@@ -147,19 +149,18 @@ export default class DJDog
 			case 'join':
 				if(session === undefined)
 				{
-					this.startSession(vc).join(i);
+					await this.startSession(vc, i.fetchReply());
 					i.reply(`Joining voice channel: ${vc}`);
 					break;
 				}
-				DJDog.replyTimeout(i, `A session already exists in ${vc}`)
+				DJDog.replyTimeout(i, `A session already exists in ${vc}`);
 				break;
 
 			case 'play':
 				let bNewSession = false;
 				if(session === undefined)
 				{
-					session = this.startSession(vc);
-					session.join(i);
+					session = await this.startSession(vc, i.fetchReply());
 					bNewSession = true;
 				}
 				const query = i.options.getString('song', true);
@@ -186,7 +187,7 @@ export default class DJDog
 
 			case 'remove':
 				const index = i.options.getInteger('index', true);
-				DJDog.replyTimeout(i, await session.remove(index))
+				DJDog.replyTimeout(i, await session.remove(index));
 				break;
 
 			case 'skip':

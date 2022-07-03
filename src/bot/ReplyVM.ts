@@ -32,6 +32,11 @@ class ReplyVM {
 		this.render();
 	}
 
+	public static async new(msg: Promise<Message>)
+	{
+		return new ReplyVM(await msg)
+	}
+
 	/**
 	 * 
 	 * @param _replyMessage The reply to the summoning interaction, obtained after replying from Interaction.fetchReply()
