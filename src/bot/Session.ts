@@ -176,13 +176,13 @@ export default class Session
 	 * Skips the current song
 	 * @returns true if there is another track, false if the queue is empty
 	 */
-	public async skip(): Promise<boolean>
+	public async skip(): Promise<string>
 	{
 		if(this.audioManager.isIdle())
-			return false;
+			return 'The queue is empty!';
 		this.audioManager.finishSong();
 		this.updateVM();
-		return true;
+		return 'Skipped!';
 	}
 
 	/**

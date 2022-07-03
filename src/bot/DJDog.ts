@@ -1,5 +1,6 @@
-import Session from './Session';
 import { Secrets } from '../Secrets';
+import Session from './Session';
+
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import {
@@ -15,14 +16,14 @@ import {
 
 export default class DJDog
 {
-	protected client: Client;
+	private client: Client;
 	private sessions: Session[]	= [];
 
 	/**
 	 * Bot class, initializes commands and manages sessions.
-	 * @param secrets the contents of confidential.json
+	 * @param secrets keys
 	 */
-	public constructor(protected secrets: Secrets)
+	public constructor(private secrets: Secrets)
 	{
 		this.client = new Client({
 			intents: [
@@ -45,18 +46,19 @@ export default class DJDog
 	 * @param vChannel Voice channel associated with the session
 	 * @returns A session based on the parameters given
 	 */
-	public getSession(vChannel: VoiceChannel | StageChannel): Session | undefined
+	private getSession(vChannel: VoiceChannel | StageChannel): Session | undefined
 	{
 		for(let session of this.sessions)
-		{
 			if(session.vChannel == vChannel)
-			{
 				return session;
-			}
-		}
 	}
 
-	public startSession(vChannel: VoiceChannel | StageChannel): Session
+	/**
+	 * Start a new session
+	 * @param vChannel VoiceChannel for session
+	 * @returns new Session
+	 */
+	private startSession(vChannel: VoiceChannel | StageChannel): Session
 	{
 		return this.sessions[this.sessions.push(new Session(vChannel, this)) - 1];
 	}
@@ -74,97 +76,6 @@ export default class DJDog
 				this.sessions.splice(index, 1);
 			}
 		});
-	}
-
-	private async replyCommands(i: Interaction)
-	{
-		// Type-checking
-		if(	! i.isCommand()
-		||	!(i.channel instanceof TextChannel)
-		||	!(i.member  instanceof GuildMember))
-			return;
-
-		// Commands that don't require a session
-		switch(i.commandName)
-		{
-			case 'ping':
-				await i.reply('pong!');
-				return;
-
-			case 'pong':
-				await i.reply('ping!');
-				return;
-		}
-
-		// Check for existing session
-		const vc = i.member.voice.channel;
-		if(!vc)
-		{
-			DJDog.replyTimeout(i, 'You are not in a voice channel!');
-			return;
-		}
-		let session = this.getSession(vc);
-
-		// Commands that can begin a session
-		switch(i.commandName)
-		{
-			case 'join':
-				if(session === undefined)
-				{
-					this.startSession(vc).join(i);
-					i.reply(`Joining voice channel: ${vc}`);
-					break;
-				}
-				DJDog.replyTimeout(i, `A session already exists in ${vc}`)
-				break;
-
-			case 'play':
-				let newSession = false;
-				if(session === undefined)
-				{
-					session = this.startSession(vc);
-					session.join(i);
-					newSession = true;
-				}
-				const query = i.options.getString('song', true);
-				i.reply(await session.play(query));
-				if(!newSession)
-					setTimeout(()=>{i.deleteReply()}, 5000);
-				break;
-		}
-
-		if(session === undefined)
-		{
-			DJDog.replyTimeout(i, `No active session exists in ${vc}`);
-			return;
-		}
-
-		// Commands that require an active session
-		switch(i.commandName)
-		{
-			case 'leave':
-				this.endSession(session);
-				DJDog.replyTimeout(i, `Leaving voice channel: ${vc}`);
-				break;
-
-			case 'remove':
-				const index = i.options.getInteger('index', true);
-				DJDog.replyTimeout(i, await session.remove(index))
-				break;
-
-			case 'skip':
-				const skipped = await session.skip();
-				if(skipped)
-					i.reply('Skipped!');
-				else
-					i.reply('The queue is empty!');
-				setTimeout(()=>{i.deleteReply()}, 5000);
-				break;
-
-			case 'pause':
-				DJDog.replyTimeout(i, await session.pause());
-				break;
-		}
 	}
 
 	/**
@@ -200,5 +111,91 @@ export default class DJDog
 	{
 		i.reply(msg);
 		setTimeout(()=>{i.deleteReply()}, 5000);
+	}
+
+	/**
+	 * Respond to commands
+	 * @param i Interaction
+	 */
+	private async replyCommands(i: Interaction): Promise<void>
+	{
+		// Type-checking for CommandInteraction
+		if(	! i.isCommand()
+		||	!(i.channel instanceof TextChannel)
+		||	!(i.member  instanceof GuildMember))
+			return;
+
+		// Commands that don't require a session
+		if(i.commandName == 'ping' || i.commandName == 'pong')
+		{
+			i.reply(i.commandName == 'ping' ? 'pong!' : 'ping!');
+			return;
+		}
+
+		// Check for existing session
+		const vc = i.member.voice.channel;
+		if(!vc)
+		{
+			DJDog.replyTimeout(i, 'You are not in a voice channel!');
+			return;
+		}
+		let session = this.getSession(vc);
+
+		// Commands that can begin a session
+		switch(i.commandName)
+		{
+			case 'join':
+				if(session === undefined)
+				{
+					this.startSession(vc).join(i);
+					i.reply(`Joining voice channel: ${vc}`);
+					break;
+				}
+				DJDog.replyTimeout(i, `A session already exists in ${vc}`)
+				break;
+
+			case 'play':
+				let bNewSession = false;
+				if(session === undefined)
+				{
+					session = this.startSession(vc);
+					session.join(i);
+					bNewSession = true;
+				}
+				const query = i.options.getString('song', true);
+				i.reply(await session.play(query));
+				if(!bNewSession)
+					setTimeout(()=>{i.deleteReply()}, 5000);
+				break;
+		}
+
+		// Confirm existing session
+		if(session === undefined)
+		{
+			DJDog.replyTimeout(i, `No active session exists in ${vc}`);
+			return;
+		}
+
+		// Commands that require an active session
+		switch(i.commandName)
+		{
+			case 'leave':
+				this.endSession(session);
+				DJDog.replyTimeout(i, `Leaving voice channel: ${vc}`);
+				break;
+
+			case 'remove':
+				const index = i.options.getInteger('index', true);
+				DJDog.replyTimeout(i, await session.remove(index))
+				break;
+
+			case 'skip':
+				DJDog.replyTimeout(i, await session.skip());
+				break;
+
+			case 'pause':
+				DJDog.replyTimeout(i, await session.pause());
+				break;
+		}
 	}
 };
