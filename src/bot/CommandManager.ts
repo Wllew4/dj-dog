@@ -42,82 +42,81 @@ export async function refreshSlashCommands(this: DJDog)
  */
 export async function createInteractions(this: DJDog)
 {
-	this.client.on('interactionCreate', async (i: Interaction) =>
-	{
-		//type-checking
-		if(!i.isCommand()) return;
-		if(!(i.channel instanceof TextChannel)) return;
-		if(!(i.member instanceof GuildMember)) return;
+	// this.client.on('interactionCreate', async (i: Interaction) =>
+	// {
+	// 	//type-checking
+	// 	if(! i.isCommand())						return;
+	// 	if(!(i.channel instanceof TextChannel))	return;
+	// 	if(!(i.member  instanceof GuildMember))	return;
 
-		//Commands that don't require a session
-		switch(i.commandName)
-		{
-		case 'ping':
-			await i.reply('pong!');
-			return;
+	// 	//Commands that don't require a session
+	// 	switch(i.commandName)
+	// 	{
+	// 		case 'ping':
+	// 			await i.reply('pong!');
+	// 			return;
 
-		case 'pong':
-			await i.reply('ping!');
-			return;
-		}
+	// 		case 'pong':
+	// 			await i.reply('ping!');
+	// 			return;
+	// 	}
 
-		//get session
-		if(!(i.member.voice.channel))
-		{
-			i.reply('You are not in a voice channel!');
-			return;
-		}
-		const session = this.getSession(i.member.voice.channel);
+	// 	//get session
+	// 	if(!(i.member.voice.channel))
+	// 	{
+	// 		i.reply('You are not in a voice channel!');
+	// 		return;
+	// 	}
+	// 	const session = this.getSession(i.member.voice.channel);
 
-		//Commands that DO require a session
-		switch(i.commandName)
-		{
-		case 'join':
-			session.join();
-			i.reply(`Joining voice channel: ${i.member.voice.channel.name}`);
-			if (!session.replyVM) session.linkVM(i.fetchReply());
-			else setTimeout(()=>{i.deleteReply()}, 5000);
-			return;
+	// 	//Commands that DO require a session
+	// 	switch(i.commandName)
+	// 	{
+	// 		case 'join':
+	// 			i.reply(await session.join(i.member.voice.channel.name));
+	// 			if (!session.replyVM) session.linkVM(i.fetchReply());
+	// 			else setTimeout(()=>{i.deleteReply()}, 5000);
+	// 			break;
 
-		case 'leave':
-			this.endSession(session);
-			i.reply(`Leaving voice channel: ${i.member.voice.channel.name}`);
-			return;
+	// 		case 'leave':
+	// 			this.endSession(session);
+	// 			i.reply(`Leaving voice channel: ${i.member.voice.channel.name}`);
+	// 			break;
 
-		case 'play':
-			let query = i.options.getString('song', true)
-			if(await session.play(query))
-				i.reply(`Added ${query} to the queue.`);
-			else
-				i.reply(`Could not find a video for query ${query}`);
-			if (!session.replyVM) session.linkVM(i.fetchReply());
-			else setTimeout(()=>{i.deleteReply()}, 5000);
-			return;
-		
-		case 'remove':
-			const index = i.options.getInteger('index', true);
-			const removed = session.remove(index - 1);
-			i.reply(`Removed ${(await removed.info).title} from the queue!`);
-			setTimeout(()=>{i.deleteReply()}, 5000);
-			return;
+	// 		case 'play':
+	// 			let query = i.options.getString('song', true)
+	// 			if(await session.play(query))
+	// 				i.reply(`Added ${query} to the queue.`);
+	// 			else
+	// 				i.reply(`Could not find a video for query ${query}`);
+	// 			if (!session.replyVM) session.linkVM(i.fetchReply());
+	// 			else setTimeout(()=>{i.deleteReply()}, 5000);
+	// 			break;
+			
+	// 		case 'remove':
+	// 			const index = i.options.getInteger('index', true);
+	// 			const removed = session.remove(index - 1);
+	// 			i.reply(`Removed ${(await removed.info).title} from the queue!`);
+	// 			setTimeout(()=>{i.deleteReply()}, 5000);
+	// 			break;
 
-		case 'skip':
-			const skipped = await session.skip();
-			if(skipped)
-				i.reply('Skipped!');
-			else
-				i.reply('The queue is empty!');
-			setTimeout(()=>{i.deleteReply()}, 5000);
-			return;
+	// 		case 'skip':
+	// 			const skipped = await session.skip();
+	// 			if(skipped)
+	// 				i.reply('Skipped!');
+	// 			else
+	// 				i.reply('The queue is empty!');
+	// 			setTimeout(()=>{i.deleteReply()}, 5000);
+	// 			break;
 
-		case 'pause':
-			const isPaused: boolean = await session.pause();
-			i.reply(
-				(isPaused ? 'Paused': 'Unpaused')
-					+ ' playback.'
-			);
-			setTimeout(()=>{i.deleteReply()}, 5000);
-			return;
-		}
-	});
+	// 		case 'pause':
+	// 			const isPaused: boolean = await session.pause();
+	// 			i.reply(
+	// 				(isPaused ? 'Paused': 'Unpaused')
+	// 					+ ' playback.'
+	// 			);
+	// 			setTimeout(()=>{i.deleteReply()}, 5000);
+	// 			break;
+	// 	}
+	// });
 }

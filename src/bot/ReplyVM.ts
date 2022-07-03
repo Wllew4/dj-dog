@@ -31,6 +31,7 @@ class ReplyVM {
 		this._isPlaying = value;
 		this.render();
 	}
+
 	/**
 	 * 
 	 * @param _replyMessage The reply to the summoning interaction, obtained after replying from Interaction.fetchReply()
@@ -43,7 +44,7 @@ class ReplyVM {
 		if(this._queue)
 		{
 			for(let i = 0; i < this._queue.length(); i++)
-				queueS += `${i+1}. ${(await this._queue.at(i).info).title}\n`;
+				queueS += `${i+1}. [${(await this._queue.at(i).info).title}](${(await this._queue.at(i).info).webpage_url})\n`;
 		}
 
 		// Update current track

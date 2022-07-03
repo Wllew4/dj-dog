@@ -12,6 +12,15 @@ import { Converter } from 'ffmpeg-stream';
 import { ExecaChildProcess } from 'execa';
 import { Readable } from 'stream';
 
+import {
+	joinVoiceChannel,
+	entersState,
+	VoiceConnectionStatus,
+	VoiceConnection,
+	// AudioPlayerStatus
+} from '@discordjs/voice';
+import { StageChannel, VoiceChannel } from 'discord.js';
+
 export default class AudioManager
 {
 	private downloader?: ExecaChildProcess;
@@ -19,11 +28,17 @@ export default class AudioManager
 	
 	private paused: boolean = false;
 
+	
+
+	private connection: VoiceConnection;
+	public controller: AbortController;
+	private signal: AbortSignal;
+
 	/**
 	 * Constructs a new AudioManager object
 	 * Handles audio playback for a session
 	 */
-	public constructor()
+	public constructor(public vChannel: VoiceChannel | StageChannel)
 	{
 		this.audioPlayer = createAudioPlayer({	behaviors: {
 			noSubscriber: NoSubscriberBehavior.Pause,
@@ -31,12 +46,28 @@ export default class AudioManager
 		
 		this.audioPlayer.on('error', console.error );
 
+		this.connection = joinVoiceChannel({
+			channelId: this.vChannel.id,
+			guildId: this.vChannel.guild.id,
+			adapterCreator: this.vChannel.guild.voiceAdapterCreator,
+			selfDeaf: false,
+			selfMute: false
+		});
+		this.connection.subscribe(this.audioPlayer);
+		this.controller = new AbortController();
+		this.signal = this.controller.signal;
+	}
+
+	public async join()
+	{
+		await entersState(this.connection, VoiceConnectionStatus.Ready, this.signal);
 	}
 
 	/**
 	 * Gets the track from the top of the queue and streams it
 	 */
-	public async stream(track: Track) {
+	public async stream(track: Track)
+	{
 		try{
 			// if audio-only formats are offered, download the highest quality one
 			// else fall back to the worst video+audio format
@@ -113,6 +144,7 @@ export default class AudioManager
 	{
 		this.audioPlayer.stop();
 		this.killDownloader();
+		this.connection.destroy();
 	}
 
 	/**

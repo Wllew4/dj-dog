@@ -3,21 +3,16 @@ import Track from './Track';
 import SearchManager from './SearchManager';
 
 import {
+	CommandInteraction,
 	Message,
 	StageChannel,
 	VoiceChannel
 } from 'discord.js';
-import {
-	joinVoiceChannel,
-	entersState,
-	VoiceConnectionStatus,
-	VoiceConnection,
-	AudioPlayerStatus
-} from '@discordjs/voice';
 import DJDog from './DJDog';
 import ReplyVM from './ReplyVM';
 import { APIMessage } from 'discord.js/node_modules/discord-api-types';
 import Queue from './Queue';
+import { AudioPlayerStatus } from '@discordjs/voice';
 
 export default class Session
 {
@@ -33,13 +28,11 @@ export default class Session
 
 	private audioManager: AudioManager;
 
-	private connection: VoiceConnection;
-	private controller: AbortController;
-	private signal: AbortSignal;
-
-	async linkVM(pReply: Promise<Message|APIMessage>) {
+	async linkVM(pReply: Promise<Message|APIMessage>)
+	{
 		const reply = await pReply;
-		if (reply instanceof Message) {
+		if (reply instanceof Message)
+		{
 			this.replyVM = new ReplyVM(reply);
 		}
 	}
@@ -55,33 +48,19 @@ export default class Session
 		this.timeout = setTimeout(()=>{},0);
 		this.startTimeout();
 
-		this.connection = joinVoiceChannel({
-			channelId: this.vChannel.id,
-			guildId: this.vChannel.guild.id,
-			adapterCreator: this.vChannel.guild.voiceAdapterCreator,
-			selfDeaf: false,
-			selfMute: false
-		});
-
-		this.audioManager = new AudioManager();
-		this.connection.subscribe(this.audioManager.audioPlayer);
-
-		this.controller = new AbortController();
-		this.signal = this.controller.signal;
+		this.audioManager = new AudioManager(vChannel);
 
 		// @ts-ignore
-		// not sure why this was giving an intellisense error,
-		// and there is no compiler error
-		this.audioManager.audioPlayer.on('stateChange', (oldState, newState) => {
+		this.audioManager.audioPlayer.on("stateChange", (oldState, newState) => {
 			if(newState.status == AudioPlayerStatus.Idle && oldState.status != AudioPlayerStatus.Idle)
-				this.advanceSong();
-		});
+				this.refreshPlayer();
+		})
 	}
 
 	/**
 	 * Call to change songs
 	 */
-	private async advanceSong()
+	private async refreshPlayer()
 	{
 		// If the queue is empty, start the disconnect timer
 		// and do not progress to next track
@@ -95,7 +74,7 @@ export default class Session
 		}
 		else
 			clearTimeout(this.timeout);
-
+		
 		// Currently playing music, don't start next song
 		if(!this.audioManager.isIdle())
 			return;
@@ -134,15 +113,16 @@ export default class Session
 	/**
 	 * Connects the bot to its voice channel
 	 */
-	public async join()
+	public async join(i: CommandInteraction)
 	{
 		try
 		{
-			await entersState(this.connection, VoiceConnectionStatus.Ready, this.signal);
+			this.audioManager.join()
+			this.linkVM(i.fetchReply());
 		}
 		catch (e)
 		{
-			this.controller.abort();
+			this.audioManager.controller.abort();
 			console.error(e);
 		}
 	}
@@ -155,7 +135,6 @@ export default class Session
 		try
 		{
 			this.audioManager.stop();
-			this.connection.destroy();
 		}
 		catch (e)
 		{
@@ -167,24 +146,17 @@ export default class Session
 	 * Adds a song to the queue
 	 * @param query The url/query for the song to queue up
 	 */
-	public async play(query: string): Promise<boolean>
+	public async play(query: string): Promise<string>
 	{
-		let track: Track | null;
-		if (SearchManager.isValidUrl(query))
-			track = new Track(query);
-		else
-		{
-			let song = await SearchManager.search(query);
-			if(song == null)
-				return false;
-			track = new Track(song);
-		}
+		let track: Track | null = await SearchManager.get(query);
+		if(track == null)
+			return `Could not find a video for query: ${query}`;
 
 		this.queue.add(track);
-		this.advanceSong();
+		this.refreshPlayer();
 		this.updateVM();
-
-		return true;
+		
+		return `Added [${query}](${track.url}) to the queue.`;
 	}
 
 	/**

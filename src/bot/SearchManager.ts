@@ -1,10 +1,21 @@
-// activate api & get key from https://console.cloud.google.com/apis/library/youtube.googleapis.com
 import getSecrets from '../Secrets';
 import fetch from 'cross-fetch';
+import Track from './Track';
 
 export default class SearchManager
 {
-	static async search (query: string): Promise<string | null> {
+	public static async get(query: string): Promise<Track | null>
+	{
+		if (SearchManager.isValidUrl(query))
+			return new Track(query);
+
+		let song = await SearchManager.search(query);
+		if(song == null)
+			return null;
+		return new Track(song);
+	}
+
+	private static async search (query: string): Promise<string | null> {
 
 		console.log(`Searching for: \"${query}\"...`);
 
@@ -29,7 +40,7 @@ export default class SearchManager
 		return url;
 	}
 
-	static isValidUrl (url: string): boolean {
+	private static isValidUrl (url: string): boolean {
 		try {
 			new URL(url);
 		} catch (err) {
