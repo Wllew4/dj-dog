@@ -82,7 +82,6 @@ export default class Session
 	 */
 	private startTimeout()
 	{
-		this.updateVM();
 		this.timeout = setTimeout(async () => {
 			this.dj.endSession(this);
 		}, Session.TIMEOUT_TIME * 1000);
