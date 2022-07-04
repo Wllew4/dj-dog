@@ -1,4 +1,4 @@
-# 🐶🎵 dj-dog 3.2
+# 🐶🎵 dj-dog 3.2.1
 ## Notable changes:
 1. Major under-the-hood stability improvements
 1. Added "empty player" to ViewModel
