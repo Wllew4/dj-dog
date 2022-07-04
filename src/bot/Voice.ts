@@ -1,4 +1,4 @@
-import Track from './Track';
+import Track from '../music/Track';
 
 import {
 	AudioPlayer,
@@ -12,7 +12,7 @@ import {
 import { StageChannel, VoiceChannel } from 'discord.js';
 import YTAudioStream from '../yt/Stream';
 
-export default class AudioManager
+export default class Voice
 {
 	private _paused: boolean = false;
 	public get paused() { return this._paused; }
@@ -58,25 +58,9 @@ export default class AudioManager
 	 */
 	public async stream(track: Track)
 	{
-		try{
-			// // if audio-only formats are offered, download the highest quality one
-			// // else fall back to the worst video+audio format
-			// // output to process stdout so we can stream this
-			// this.downloader = exec(track.url,
-			// 	{
-			// 		format:'bestaudio/worst',
-			// 		output:'-',
-			// 		noCheckCertificate:true,
-			// 		forceIpv4:true
-			// 	});
-			// if (!this.downloader.stdout) throw Error('Download process has no stdout???');
-			// // no joke, downloader will quit if nobody listens to its errors :(
-			// // Logging here outputs transferred buffers lol
-			// this.downloader.stderr?.on('data', (e)=>{ /* console.log(e) */});
-
-			// const audioStream = this.convert(this.downloader.stdout);
-			// const resource = createAudioResource(audioStream, { inputType: StreamType.OggOpus });
-			const resource = YTAudioStream.createResource(track);
+		try
+		{
+			const resource = await YTAudioStream.createResource(track);
 			this.audioPlayer.play(resource);
 		}
 		catch(err){

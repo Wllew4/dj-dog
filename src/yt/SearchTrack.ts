@@ -1,6 +1,6 @@
 import getSecrets from '../Secrets';
 import fetch from 'cross-fetch';
-import Track from '../bot/Track';
+import Track from '../music/Track';
 import YTSearchInfo from './SearchInfo';
 
 export default class YTSearchTrack

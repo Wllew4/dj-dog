@@ -1,4 +1,4 @@
-import Track from '../bot/Track';
+import Track from '../music/Track';
 import {
 	createAudioResource,
 	StreamType, 
@@ -12,7 +12,7 @@ export default class YTAudioStream
 {
 	public static downloader?: ExecaChildProcess;
 
-	public static createResource(track: Track): AudioResource<null>
+	public static async createResource(track: Track): Promise<AudioResource<null>>
 	{
 		// if audio-only formats are offered, download the highest quality one
 		// else fall back to the worst video+audio format
@@ -22,7 +22,7 @@ export default class YTAudioStream
 				format:'bestaudio/worst',
 				output:'-',
 				noCheckCertificate:true,
-				forceIpv4:true
+				forceIpv4:true,
 			});
 		if (!this.downloader.stdout) throw Error('Download process has no stdout???');
 		// no joke, downloader will quit if nobody listens to its errors :(
@@ -31,6 +31,15 @@ export default class YTAudioStream
 
 		const audioStream = this.convert(this.downloader.stdout);
 		return createAudioResource(audioStream, { inputType: StreamType.OggOpus });
+	}
+
+	/**
+	 * Stop streaming
+	 */
+	public static killDownloader(): void {
+		if (this.downloader && !this.downloader.killed) {
+			this.downloader.kill('SIGTERM');
+		}
 	}
 
 	/**
@@ -49,14 +58,5 @@ export default class YTAudioStream
 		mediaStream.pipe(converter.createInputStream({}));
 		converter.run();
 		return output;
-	}
-
-	/**
-	 * Stop streaming
-	 */
-	public static killDownloader(): void {
-		if (this.downloader && !this.downloader.killed) {
-			this.downloader.kill('SIGTERM');
-		}
 	}
 }

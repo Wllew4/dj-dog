@@ -21,6 +21,7 @@ export default class DJDog
 {
 	private client: Client;
 	private sessions: Session[]	= [];
+	private static readonly DELETE_REPLY_TIMEOUT = 5000;
 
 	/**
 	 * Bot class, initializes commands and manages sessions.
@@ -63,7 +64,7 @@ export default class DJDog
 	 */
 	private startSession(vChannel: VoiceChannel | StageChannel, i: Promise<Message | APIMessage>): Session
 	{
-		return this.sessions[this.sessions.push(new Session(vChannel, this.endSession, new ReplyVM(i as Promise<Message>))) - 1];
+		return this.sessions[this.sessions.push(new Session(vChannel, this, new ReplyVM(i as Promise<Message>))) - 1];
 	}
 
 	/**
@@ -113,7 +114,7 @@ export default class DJDog
 	private static replyTimeout(i: CommandInteraction, msg: string)
 	{
 		i.reply(msg);
-		setTimeout(()=>{i.deleteReply()}, 5000);
+		setTimeout(()=>{i.deleteReply()}, DJDog.DELETE_REPLY_TIMEOUT);
 	}
 
 	/**
@@ -165,9 +166,13 @@ export default class DJDog
 					bNewSession = true;
 				}
 				const query = i.options.getString('song', true);
-				i.reply(await session.play(query));
+				i.reply(`Searching for "${query}"...`);
+				let r = await session.play(query);
 				if(!bNewSession)
+				{
+					((await i.fetchReply()) as Message).edit(r)
 					setTimeout(()=>{i.deleteReply()}, 5000);
+				}
 				break;
 		}
 

@@ -1,8 +1,9 @@
-import AudioManager from './AudioManager';
-import Track from './Track';
+import Voice from './Voice';
+import Track from '../music/Track';
 import YTSearchTrack from '../yt/SearchTrack';
 import ReplyVM from './ReplyVM';
-import Queue from './Queue';
+import Queue from '../music/Queue';
+import DJDog from './DJDog';
 
 import {
 	StageChannel,
@@ -10,37 +11,30 @@ import {
 } from 'discord.js';
 import { AudioPlayerStatus } from '@discordjs/voice';
 
-interface IEndFunction
-{
-	(session: Session): void
-}
-
 export default class Session
 {
-	public queue: Queue<Track>;
+	public queue: Queue<Track> = new Queue<Track>();
 	public currentTrack: Track | undefined;
 
-	private timeoutTime: number = 60;
+	private static readonly TIMEOUT_TIME: number = 60;
 	private timeout: NodeJS.Timeout;
 
-	private audioManager: AudioManager;
+	private voice: Voice;
 
 	/**
 	 * Starts a new session.
 	 * @param vChannel The voice channel associated with the session
 	 */
-	public constructor(public vChannel: VoiceChannel | StageChannel, private endFunction: IEndFunction, public replyVM: ReplyVM)
+	public constructor(public vChannel: VoiceChannel | StageChannel, private dj: DJDog, public replyVM: ReplyVM)
 	{
-		this.queue = new Queue<Track>();
+		this.voice = new Voice(vChannel);
+		this.voice.join();
 
 		this.timeout = setTimeout(()=>{},0);
 		this.startTimeout();
 
-		this.audioManager = new AudioManager(vChannel);
-		this.audioManager.join();
-
 		// @ts-ignore
-		this.audioManager.audioPlayer.on("stateChange", (oldState, newState) => {
+		this.voice.audioPlayer.on("stateChange", (oldState, newState) => {
 			if(newState.status == AudioPlayerStatus.Idle && oldState.status != AudioPlayerStatus.Idle)
 				this.refreshPlayer();
 		})
@@ -65,22 +59,22 @@ export default class Session
 			clearTimeout(this.timeout);
 		
 		// Currently playing music, don't start next song
-		if(!this.audioManager.isIdle())
+		if(!this.voice.isIdle())
 			return;
 
 		// Play next song
 		this.currentTrack = this.queue.advance();
 		if(this.currentTrack == undefined)
 			return;
-		this.audioManager.stream(this.currentTrack);
+		this.voice.stream(this.currentTrack);
 
-		console.log(`Now playing: ${(await this.currentTrack.info).title}`);
+		console.log(`Now playing: ${(this.currentTrack.info).title}`);
 		this.updateVM();
 	}
 
 	private async updateVM()
 	{
-		this.replyVM.render(this.currentTrack, this.queue, this.audioManager.paused);
+		this.replyVM.render(this.currentTrack, this.queue, this.voice.paused);
 	}
 
 	/**
@@ -88,10 +82,10 @@ export default class Session
 	 */
 	private startTimeout()
 	{
+		this.updateVM();
 		this.timeout = setTimeout(async () => {
-			this.endFunction(this);
-			this.replyVM.remove();
-		}, this.timeoutTime * 1000);
+			this.dj.endSession(this);
+		}, Session.TIMEOUT_TIME * 1000);
 	}
 
 	/**
@@ -99,14 +93,8 @@ export default class Session
 	 */
 	public async leave()
 	{
-		try
-		{
-			this.audioManager.kill();
-		}
-		catch (e)
-		{
-			console.error(e);
-		}
+		this.voice.kill();
+		this.replyVM.remove();
 	}
 
 	/**
@@ -118,12 +106,14 @@ export default class Session
 		let track: Track | null = await YTSearchTrack.getTrack(query);
 		if(track == null)
 			return `Could not find a video for query: ${query}`;
+		if(track.info.is_live)
+			return `Unable to queue a livestream.`;
 
 		this.queue.add(track);
 		this.refreshPlayer();
 		this.updateVM();
 		
-		return `Added [${query}](${track.url}) to the queue.`;
+		return `Added [${track.info.title}](${track.url}) to the queue.`;
 	}
 
 	/**
@@ -136,7 +126,7 @@ export default class Session
 		let removed = this.queue.remove(i-1);
 		this.updateVM();
 		if(removed)
-			return `Removed ${(await removed.info).title} from the queue!`;
+			return `Removed ${removed.info.title} from the queue!`;
 		return `Failed to remove index ${i} from the queue`;
 	}
 
@@ -146,9 +136,9 @@ export default class Session
 	 */
 	public async skip(): Promise<string>
 	{
-		if(this.audioManager.isIdle())
+		if(this.voice.isIdle())
 			return 'The queue is empty!';
-		this.audioManager.finishSong();
+		this.voice.finishSong();
 		this.updateVM();
 		return 'Skipped!';
 	}
@@ -159,9 +149,9 @@ export default class Session
 	 */
 	public async pause(): Promise<string>
 	{
-		if(this.audioManager.isIdle() || this.audioManager.isBuffering())
+		if(this.voice.isIdle() || this.voice.isBuffering())
 			return 'Not currently playing anything';
-		const paused = this.audioManager.pause();
+		const paused = this.voice.pause();
 		this.updateVM();
 		return (paused ? 'Paused': 'Resumed') + ' playback.';
 	}

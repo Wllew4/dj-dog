@@ -8,11 +8,11 @@ export default class Track
 	 */
 	public static async new(url: string, info: Promise<YtResponse>): Promise<Track>
 	{
-		return new Track(url, info);
+		return new Track(url, await info);
 	}
 
 	private constructor(
 		public readonly url: string,
-		public readonly info: Promise<YtResponse>
+		public readonly info: YtResponse
 	) {}
 };

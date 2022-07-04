@@ -1,11 +1,11 @@
-# dj-dog 3.1 🐋
+# 🐶🎵 dj-dog 3.2
 ## Notable changes:
-1. youtube-dl -> yt-dlp
-	* No longer crashes on age restricted videos
-	* No longer crashes on shorts
-	* Begins playback faster
-1. Container hosts entire app, no need to clone any code
-1. Updated Makefile with additional dev tools
+1. Major under-the-hood stability improvements
+1. Added "empty player" to ViewModel
+1. Significant source code restructuring/refactoring
+
+## Known issues:
+1. Cannot play livestreams (but it won't crash)
 
 ## Get it running:
 1. Create `env` file with credentials. Don't use quotation marks.
