@@ -170,7 +170,7 @@ export default class DJDog
 				let r = await session.play(query);
 				if(!bNewSession)
 				{
-					((await i.fetchReply()) as Message).edit(r)
+					await ((await i.fetchReply()) as Message).edit(r)
 					setTimeout(()=>{i.deleteReply()}, 5000);
 				}
 				break;
