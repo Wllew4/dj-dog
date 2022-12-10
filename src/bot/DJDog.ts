@@ -16,6 +16,7 @@ import {
 } from 'discord.js'
 import { APIMessage } from 'discord.js/node_modules/discord-api-types'
 import ReplyVM from './ReplyVM'
+import Log from '../Log'
 
 export default class DJDog {
 	private client: Client
@@ -38,7 +39,7 @@ export default class DJDog {
 
 		this.client.login(this.secrets.token)
 		this.client.on('ready', () => {
-			console.log('Ready!!')
+			Log.logSystem('Ready!!')
 		})
 	}
 
@@ -97,7 +98,7 @@ export default class DJDog {
 				body: commands,
 			})
 		} catch (e) {
-			console.error(e)
+			Log.logSystemErr(e)
 		}
 	}
 

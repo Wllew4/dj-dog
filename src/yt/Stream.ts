@@ -28,9 +28,7 @@ export default class YTAudioStream {
 			throw Error('Download process has no stdout???')
 		// no joke, downloader will quit if nobody listens to its errors :(
 		// Logging here outputs transferred buffers lol
-		this.downloader.stderr?.on('data', (e) => {
-			/* console.log(e) */
-		})
+		this.downloader.stderr?.on('data', (e) => {})
 
 		const audioStream = this.convert(this.downloader.stdout)
 		return createAudioResource(audioStream, {

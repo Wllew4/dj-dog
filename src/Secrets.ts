@@ -1,3 +1,5 @@
+import Log from './Log'
+
 // cached secrets
 let secrets: Secrets
 
@@ -21,8 +23,8 @@ export default async function getSecrets() {
 				youtube_api_key: unwrap(process.env.YT_API_KEY),
 			}
 		} catch (error) {
-			console.log('Failed to load credentials!')
-			console.error(error)
+			Log.logSystemErr('Failed to load credentials!')
+			Log.logSystemErr(error)
 		}
 	}
 	return secrets

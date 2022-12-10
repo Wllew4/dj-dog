@@ -7,6 +7,7 @@ import DJDog from './DJDog'
 
 import { StageChannel, VoiceChannel } from 'discord.js'
 import { AudioPlayerStatus } from '@discordjs/voice'
+import Log from '../Log'
 
 export default class Session {
 	public queue: Queue<Track> = new Queue<Track>()
@@ -64,7 +65,9 @@ export default class Session {
 		if (this.currentTrack == undefined) return
 		this.voice.stream(this.currentTrack)
 
-		console.log(`Now playing: ${this.currentTrack.info.title}`)
+		Log.logSystem(
+			`Now playing: "${this.currentTrack.info.title}" in channel "${this.vChannel.name}" in server "${this.vChannel.guild.name}"`
+		)
 		this.updateVM()
 	}
 

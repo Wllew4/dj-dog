@@ -2,6 +2,7 @@ import getSecrets from '../Secrets'
 import fetch from 'cross-fetch'
 import Track from '../music/Track'
 import YTSearchInfo from './SearchInfo'
+import Log from '../Log'
 
 export default class YTSearchTrack {
 	/**
@@ -20,7 +21,7 @@ export default class YTSearchTrack {
 	}
 
 	private static async search(query: string): Promise<string | null> {
-		console.log(`Searching for: "${query}"...`)
+		Log.logSystem(`Searching for: "${query}"...`)
 
 		const { youtube_api_key } = await getSecrets()
 		const res = await fetch(
@@ -29,8 +30,8 @@ export default class YTSearchTrack {
 		)
 
 		if (!res.ok) {
-			console.log('Bad response from server:')
-			console.error(res)
+			Log.logSystemErr('Bad response from server:')
+			Log.logSystemErr(res)
 			return null
 		}
 
@@ -38,11 +39,11 @@ export default class YTSearchTrack {
 
 		const searchResult = resJson.items[0]
 		if (!searchResult) {
-			console.log(`No video found for query: ${query}`)
+			Log.logSystem(`No video found for query: "${query}"`)
 			return null
 		}
 		const url = `https://www.youtube.com/watch?v=${searchResult.id.videoId}`
-		console.log(`Found: ${url}`)
+		Log.logSystem(`Found: "${url}"`)
 		return url
 	}
 

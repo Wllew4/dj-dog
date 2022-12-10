@@ -12,6 +12,7 @@ import {
 } from '@discordjs/voice'
 import { StageChannel, VoiceChannel } from 'discord.js'
 import YTAudioStream from '../yt/Stream'
+import Log from '../Log'
 
 export default class Voice {
 	private _paused: boolean = false
@@ -36,7 +37,7 @@ export default class Voice {
 			},
 		})
 
-		this.audioPlayer.on('error', console.error)
+		this.audioPlayer.on('error', Log.logSystemErr)
 
 		this.connection = joinVoiceChannel({
 			channelId: this.vChannel.id,
@@ -67,7 +68,7 @@ export default class Voice {
 			const resource = await YTAudioStream.createResource(track)
 			this.audioPlayer.play(resource)
 		} catch (err) {
-			console.error(err)
+			Log.logSystemErr(err)
 		}
 	}
 
