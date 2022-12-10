@@ -1,60 +1,57 @@
-import getSecrets from '../Secrets';
-import fetch from 'cross-fetch';
-import Track from '../music/Track';
-import YTSearchInfo from './SearchInfo';
+import getSecrets from '../Secrets'
+import fetch from 'cross-fetch'
+import Track from '../music/Track'
+import YTSearchInfo from './SearchInfo'
 
-export default class YTSearchTrack
-{
+export default class YTSearchTrack {
 	/**
 	 * Find a Track based on a query
 	 * @param query Search term or URL to video
 	 * @returns the requested Track, or null if not found
 	 */
-	public static async getTrack(query: string): Promise<Track | null>
-	{
-		let url: string | null;
-		if (YTSearchTrack.isValidUrl(query))
-			url = query;
-		else
-			url = await YTSearchTrack.search(query);
-		
-		if(url == null)
-			return null;
-		
-		return await Track.new(url, YTSearchInfo.getInfo(url));
+	public static async getTrack(query: string): Promise<Track | null> {
+		let url: string | null
+		if (YTSearchTrack.isValidUrl(query)) url = query
+		else url = await YTSearchTrack.search(query)
+
+		if (url == null) return null
+
+		return await Track.new(url, YTSearchInfo.getInfo(url))
 	}
 
-	private static async search (query: string): Promise<string | null> {
+	private static async search(query: string): Promise<string | null> {
+		console.log(`Searching for: "${query}"...`)
 
-		console.log(`Searching for: "${query}"...`);
-
-		const { youtube_api_key } = await getSecrets();
-		const res = await fetch(`//www.googleapis.com/youtube/v3/search?key=${youtube_api_key}&q=${query}&maxResults=1&type=video&videoCategoryId=10&safeSearch=none`, { method: 'GET' });
+		const { youtube_api_key } = await getSecrets()
+		const res = await fetch(
+			`//www.googleapis.com/youtube/v3/search?key=${youtube_api_key}&q=${query}&maxResults=1&type=video&videoCategoryId=10&safeSearch=none`,
+			{ method: 'GET' }
+		)
 
 		if (!res.ok) {
-			console.log("Bad response from server:");
-			console.error(res);
-			return null;
+			console.log('Bad response from server:')
+			console.error(res)
+			return null
 		}
 
-		const resJson = await res.json();
+		const resJson = await res.json()
 
-		const searchResult = resJson.items[0];
+		const searchResult = resJson.items[0]
 		if (!searchResult) {
-			console.log(`No video found for query: ${query}`);
-			return null;
+			console.log(`No video found for query: ${query}`)
+			return null
 		}
-		const url = `https://www.youtube.com/watch?v=${searchResult.id.videoId}`;
-		console.log(`Found: ${url}`);
-		return url;
+		const url = `https://www.youtube.com/watch?v=${searchResult.id.videoId}`
+		console.log(`Found: ${url}`)
+		return url
 	}
 
-	private static isValidUrl (url: string): boolean {
+	private static isValidUrl(url: string): boolean {
 		try {
-			new URL(url);
+			new URL(url)
 		} catch (err) {
-			return false;
-		} 
-		return true;
+			return false
+		}
+		return true
 	}
 }
