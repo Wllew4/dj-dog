@@ -138,7 +138,9 @@ export default class DJDog {
 		const vc = i.member.voice.channel
 		if (!vc) {
 			DJDog.replyTimeout(i, 'You are not in a voice channel!')
-			Log.logSystemErr(`Received command from "${i.member.displayName}" in channel "#${i.channel.name}" of "${i.guild?.name}", but they were not in a voice channel`)
+			Log.logSystemErr(
+				`Received command from "${i.member.displayName}" in channel "#${i.channel.name}" of "${i.guild?.name}", but they were not in a voice channel`
+			)
 			return
 		}
 		let session = this.getSession(vc)
