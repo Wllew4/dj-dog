@@ -40,6 +40,10 @@ export default class DJDog {
 		this.client.login(this.secrets.token)
 		this.client.on('ready', () => {
 			Log.logSystem('Ready!!')
+			this.client.user?.setActivity(
+				'your favorite tunes. Livestreams now supported!',
+				{ type: 'PLAYING' }
+			)
 		})
 	}
 

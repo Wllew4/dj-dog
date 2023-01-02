@@ -18,7 +18,7 @@ RUN python3 -V && python -V
 # 3. FFmpeg
 ## 3.1 Assemblers
 ### 3.1.0 Dependencies
-RUN yum install -y autoconf automake bzip2 bzip2-devel cmake diffutils freetype-devel gcc gcc-c++ git libtool make pkgconfig zlib-devel
+RUN yum install -y autoconf automake bzip2 bzip2-devel cmake diffutils freetype-devel gcc gcc-c++ git libtool make pkgconfig zlib-devel openssl openssl-devel
 RUN mkdir ~/ffmpeg_sources
 ### 3.1.1 NASM
 RUN cd ~/ffmpeg_sources && \
@@ -104,6 +104,7 @@ PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./conf
 	--enable-libvpx \
 	--enable-libx264 \
 	--enable-libx265 \
+	--enable-openssl \
 	--enable-nonfree && \
 make && \
 make install

@@ -99,7 +99,6 @@ export default class Session {
 	public async play(query: string): Promise<string> {
 		let track: Track | null = await YTSearchTrack.getTrack(query)
 		if (track == null) return `Could not find a video for query: ${query}`
-		if (track.info.is_live) return `Unable to queue a livestream.`
 
 		this.queue.add(track)
 		this.refreshPlayer()
