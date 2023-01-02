@@ -1,15 +1,4 @@
-# 🐶🎵 dj-dog 3.2.2
-
-## Notable changes:
-
-1. Fixed crash caused by missing `await`
-1. Better logging
-1. Prettier code formatting
-
-## Known issues:
-
-1. Cannot play livestreams (but it won't crash)
-1. Some degree of general jankyness still about
+# 🐶🎵 dj-dog
 
 ## Get it running:
 
