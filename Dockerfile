@@ -13,7 +13,7 @@ RUN npm -v && node -v && yarn -v
 
 # 2. Python 3.9
 RUN dnf install -y python39
-RUN python3 -V && python -V
+RUN python3 -V
 
 # 3. FFmpeg
 ## 3.1 Assemblers
