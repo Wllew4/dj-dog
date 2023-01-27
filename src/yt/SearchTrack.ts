@@ -11,13 +11,18 @@ export default class YTSearchTrack {
 	 * @returns the requested Track, or null if not found
 	 */
 	public static async getTrack(query: string): Promise<Track | null> {
+		// URL sanitization
 		let url: string | null
 		if (YTSearchTrack.isValidUrl(query)) url = query
 		else url = await YTSearchTrack.search(query)
-
 		if (url == null) return null
 
-		return await Track.new(url, YTSearchInfo.getInfo(url))
+		// Track info sanitization
+		let info = await YTSearchInfo.getInfo(url)
+		if (info == null) return null
+
+		// Create track if valid
+		return await Track.new(url, info)
 	}
 
 	private static async search(query: string): Promise<string | null> {

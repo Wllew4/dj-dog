@@ -41,7 +41,7 @@ export default class DJDog {
 		this.client.on('ready', () => {
 			Log.logSystem('Ready!!')
 			this.client.user?.setActivity(
-				'your favorite tunes. Livestreams now supported!',
+				`your favorite tunes (v${process.env.npm_package_version})`,
 				{ type: 'PLAYING' }
 			)
 		})
