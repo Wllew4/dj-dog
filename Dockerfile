@@ -12,8 +12,8 @@ RUN dnf module install -y nodejs:16 && npm i -g yarn
 RUN npm -v && node -v && yarn -v
 
 # 2. Python 3.9
-RUN dnf install -y python39
-RUN python3 -V
+RUN dnf install -y python
+RUN python3 -V && python -V
 
 # 3. FFmpeg
 ## 3.1 Assemblers
