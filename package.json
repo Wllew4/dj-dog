@@ -1,6 +1,6 @@
 {
 	"name": "dj-dog",
-	"version": "3.3.2",
+	"version": "3.3.3",
 	"engines": {
 		"node": "16.x.x"
 	},
