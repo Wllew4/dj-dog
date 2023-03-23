@@ -2,6 +2,8 @@ import { Message, MessageEditOptions } from 'discord.js'
 import Queue from '../music/Queue'
 import Track from '../music/Track'
 
+const LUMINOUS_VIVID_PINK = 15277667
+
 /**
  * ViewModel representing the current track.
  * Updates a set Discord message every time a setter is used.
@@ -39,7 +41,7 @@ class ReplyVM {
 				{
 					title: 'No music queued',
 					thumbnail: undefined,
-					color: 'LUMINOUS_VIVID_PINK',
+					color: LUMINOUS_VIVID_PINK,
 					description: new Date(0 * 1000).toISOString().slice(11, 19),
 					fields: [
 						{
@@ -47,7 +49,7 @@ class ReplyVM {
 							value: 'Queue is Empty',
 						},
 					],
-					timestamp: Date.now(),
+					timestamp: new Date().toISOString(),
 				},
 			],
 		}
@@ -87,7 +89,7 @@ class ReplyVM {
 								height: thumb.height,
 						  }
 						: undefined,
-					color: 'LUMINOUS_VIVID_PINK',
+					color: LUMINOUS_VIVID_PINK,
 					description: info.is_live
 						? '🔴 LIVE'
 						: `${new Date(info.duration * 1000)
@@ -99,7 +101,7 @@ class ReplyVM {
 							value: queueS != '' ? queueS : 'Queue is Empty',
 						},
 					],
-					timestamp: Date.now(),
+					timestamp: new Date().toISOString(),
 				},
 			],
 		}

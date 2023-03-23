@@ -4,17 +4,17 @@ import Session from './Session'
 import { REST } from '@discordjs/rest'
 import { Routes } from 'discord-api-types/v9'
 import {
+	APIMessage,
 	Client,
 	CommandInteraction,
 	GuildMember,
-	Intents,
+	IntentsBitField,
 	Interaction,
 	Message,
 	StageChannel,
 	TextChannel,
 	VoiceChannel,
 } from 'discord.js'
-import { APIMessage } from 'discord.js/node_modules/discord-api-types'
 import ReplyVM from './ReplyVM'
 import Log from '../Log'
 
@@ -29,7 +29,10 @@ export default class DJDog {
 	 */
 	public constructor(private secrets: Secrets) {
 		this.client = new Client({
-			intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES],
+			intents: [
+				IntentsBitField.Flags.Guilds,
+				IntentsBitField.Flags.GuildVoiceStates,
+			],
 		})
 
 		this.refreshSlashCommands()
@@ -41,8 +44,7 @@ export default class DJDog {
 		this.client.on('ready', () => {
 			Log.logSystem('Ready!!')
 			this.client.user?.setActivity(
-				`your favorite tunes (v${process.env.npm_package_version})`,
-				{ type: 'PLAYING' }
+				`your favorite tunes (v${process.env.npm_package_version})`
 			)
 		})
 	}
@@ -166,7 +168,7 @@ export default class DJDog {
 					session = this.startSession(vc, i.fetchReply())
 					bNewSession = true
 				}
-				const query = i.options.getString('song', true)
+				const query = i.options.get('song', true).value as string
 				i.reply(`Searching for "${query}"...`)
 				let r = await session.play(query)
 				if (!bNewSession) {
@@ -192,7 +194,7 @@ export default class DJDog {
 				break
 
 			case 'remove':
-				const index = i.options.getInteger('index', true)
+				const index = i.options.get('index', true).value as number
 				DJDog.replyTimeout(i, await session.remove(index))
 				break
 

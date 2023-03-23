@@ -1,6 +1,6 @@
 {
 	"name": "dj-dog",
-	"version": "3.3.1",
+	"version": "3.3.2",
 	"engines": {
 		"node": "16.x.x"
 	},
@@ -14,17 +14,17 @@
 	"author": "Wllew4 & Foshka",
 	"license": "MIT",
 	"devDependencies": {
-		"prettier": "^2.8.3",
-		"typescript": "^4.4.3"
+		"prettier": "^2.8.6",
+		"typescript": "^5.0.2"
 	},
 	"dependencies": {
-		"@discordjs/rest": "^0.1.0-canary.0",
-		"@discordjs/voice": "^0.6.0",
-		"cross-fetch": "^3.1.4",
-		"discord-api-types": "^0.23.1",
-		"discord.js": "^13.1.0",
+		"@discordjs/rest": "^1.6.0",
+		"@discordjs/voice": "^0.15.0",
+		"cross-fetch": "^3.1.5",
+		"discord-api-types": "^0.37.36",
+		"discord.js": "^14.8.0",
 		"ffmpeg-stream": "^0.7.0",
-		"libsodium-wrappers": "^0.7.9",
+		"libsodium-wrappers": "^0.7.11",
 		"yt-dlp-exec": "^1.0.2"
 	}
 }
