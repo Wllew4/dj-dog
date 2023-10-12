@@ -7,6 +7,7 @@ import {
 import { exec } from 'yt-dlp-exec'
 import { Converter } from 'ffmpeg-stream'
 import { ExecaChildProcess } from 'execa'
+import execa from 'execa'
 import { Readable } from 'stream'
 
 export default class YTAudioStream {
@@ -15,6 +16,8 @@ export default class YTAudioStream {
 	public static async createResource(
 		track: Track
 	): Promise<AudioResource<null>> {
+		await execa('node', ['./node_modules/yt-dlp-exec/scripts/postinstall.js'])
+		await execa('chmod', ['+x', './node_modules/yt-dlp-exec/bin/yt-dlp'])
 		// if audio-only formats are offered, download the highest quality one
 		// else fall back to the worst video+audio format
 		// output to process stdout so we can stream this
@@ -29,6 +32,9 @@ export default class YTAudioStream {
 		// no joke, downloader will quit if nobody listens to its errors :(
 		// Logging here outputs transferred buffers lol
 		this.downloader.stderr?.on('data', (e) => {})
+		this.downloader.on('error', () => {
+			console.log('here')
+		})
 
 		const audioStream = this.convert(this.downloader.stdout)
 		return createAudioResource(audioStream, {

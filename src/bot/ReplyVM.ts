@@ -22,7 +22,7 @@ class ReplyVM {
 		queue: Queue<Track>,
 		paused: boolean
 	): Promise<void> {
-		if (track)
+		if (typeof track !== 'undefined')
 			(await this._replyMessage).edit(
 				await this.busyPlayer(track, queue, paused)
 			)
