@@ -21,6 +21,7 @@ export default class Voice {
 	}
 
 	private audioPlayer: AudioPlayer
+	private ytAudioStream: YTAudioStream = new YTAudioStream(this)
 
 	private connection: VoiceConnection
 	private controller: AbortController
@@ -63,11 +64,12 @@ export default class Voice {
 	 * Streams a track
 	 * @param track the track to stream
 	 */
-	public async stream(track: Track) {
+	public stream(track: Track) {
 		try {
-			const resource = await YTAudioStream.createResource(track)
+			const resource = this.ytAudioStream.createResource(track)
 			this.audioPlayer.play(resource)
 		} catch (err) {
+			console.log('here')
 			Log.logSystemErr(err)
 		}
 	}
@@ -113,7 +115,7 @@ export default class Voice {
 	 */
 	public kill() {
 		this.finishSong()
-		YTAudioStream.killDownloader()
+		this.ytAudioStream.killDownloader()
 		this.connection.destroy()
 	}
 }

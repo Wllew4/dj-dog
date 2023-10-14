@@ -18,8 +18,10 @@ export default class Queue<T> {
 	 * shifts all other elements down
 	 * @returns the front of the queue
 	 */
-	public advance(): T | undefined {
-		return this.data.shift()
+	public advance(): T | null {
+		let next: T | undefined = this.data.shift()
+		if (next === undefined) return null
+		return next
 	}
 
 	/**

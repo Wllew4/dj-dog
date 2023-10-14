@@ -22,7 +22,7 @@ export default class YTSearchTrack {
 		if (info == null) return null
 
 		// Create track if valid
-		return await Track.new(url, info)
+		return Track.new(url, info)
 	}
 
 	private static async search(query: string): Promise<string | null> {

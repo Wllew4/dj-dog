@@ -6,18 +6,35 @@ import {
 } from '@discordjs/voice'
 import { exec } from 'yt-dlp-exec'
 import { Converter } from 'ffmpeg-stream'
-import { ExecaChildProcess } from 'execa'
-import execa from 'execa'
+import { ExecaChildProcess, node, sync } from 'execa'
 import { Readable } from 'stream'
+import Log from '../Log'
+import Voice from '../bot/Voice'
 
 export default class YTAudioStream {
-	public static downloader?: ExecaChildProcess
+	private downloader?: ExecaChildProcess
+	private voice: Voice
 
-	public static async createResource(
-		track: Track
-	): Promise<AudioResource<null>> {
-		await execa('node', ['./node_modules/yt-dlp-exec/scripts/postinstall.js'])
-		await execa('chmod', ['+x', './node_modules/yt-dlp-exec/bin/yt-dlp'])
+	constructor(voice: Voice) {
+		this.voice = voice
+	}
+
+	/**
+	 * Upgrade yt-dlp
+	 */
+	public static updateYTDLP(): string {
+		node('./node_modules/yt-dlp-exec/scripts/postinstall.js')
+		sync('chmod', ['+x', './node_modules/yt-dlp-exec/bin/yt-dlp'])
+		return sync('./node_modules/yt-dlp-exec/bin/yt-dlp', ['--version'])
+			.stdout
+	}
+
+	/**
+	 * Create an AudioResource for a Track
+	 * @param track song to download and stream
+	 * @returns AudioResource
+	 */
+	public createResource(track: Track): AudioResource<null> {
 		// if audio-only formats are offered, download the highest quality one
 		// else fall back to the worst video+audio format
 		// output to process stdout so we can stream this
@@ -32,11 +49,8 @@ export default class YTAudioStream {
 		// no joke, downloader will quit if nobody listens to its errors :(
 		// Logging here outputs transferred buffers lol
 		this.downloader.stderr?.on('data', (e) => {})
-		this.downloader.on('error', () => {
-			console.log('here')
-		})
 
-		const audioStream = this.convert(this.downloader.stdout)
+		const audioStream = this.convert(this.downloader.stdout, track)
 		return createAudioResource(audioStream, {
 			inputType: StreamType.OggOpus,
 		})
@@ -45,7 +59,7 @@ export default class YTAudioStream {
 	/**
 	 * Stop streaming
 	 */
-	public static killDownloader(): void {
+	public killDownloader(): void {
 		if (this.downloader && !this.downloader.killed) {
 			this.downloader.kill('SIGTERM')
 		}
@@ -56,7 +70,7 @@ export default class YTAudioStream {
 	 * @param mediaStream The incoming audio/video stream
 	 * @returns The converted audio stream
 	 */
-	private static convert(mediaStream: Readable): Readable {
+	private convert(mediaStream: Readable, track: Track): Readable {
 		const converter = new Converter()
 		const output = converter.createOutputStream({
 			'f': 'opus',
@@ -65,7 +79,12 @@ export default class YTAudioStream {
 			'application': 'audio',
 		})
 		mediaStream.pipe(converter.createInputStream({}))
-		converter.run()
+		converter.run().catch(() => {
+			Log.logSystemErr('Conversion failed, updating yt-dlp...')
+			const version = YTAudioStream.updateYTDLP()
+			Log.logSystemErr(`yt-dlp updated to ${version}`)
+			this.voice.stream(track)
+		})
 		return output
 	}
 }

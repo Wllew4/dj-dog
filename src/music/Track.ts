@@ -5,7 +5,7 @@ export default class Track {
 	 * Constructs a new track
 	 * @param url The song's url
 	 */
-	public static async new(url: string, info: YtResponse): Promise<Track> {
+	public static new(url: string, info: YtResponse): Track {
 		return new Track(url, info)
 	}
 

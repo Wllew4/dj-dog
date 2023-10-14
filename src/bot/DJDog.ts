@@ -17,6 +17,8 @@ import {
 } from 'discord.js'
 import ReplyVM from './ReplyVM'
 import Log from '../Log'
+import Track from '../music/Track'
+import YTSearchTrack from '../yt/SearchTrack'
 
 export default class DJDog {
 	private client: Client
@@ -160,24 +162,44 @@ export default class DJDog {
 					break
 				}
 				DJDog.replyTimeout(i, `A session already exists in ${vc}`)
-				break
+				return
 
 			case 'play':
-				let bNewSession = false
-				if (session === undefined) {
-					session = this.startSession(vc, i.fetchReply())
-					bNewSession = true
-				}
+				// Search for track
 				const query = i.options.get('song', true).value as string
 				i.reply(`Searching for "${query}"...`)
-				let r = await session.play(query)
-				if (!bNewSession) {
-					await ((await i.fetchReply()) as Message).edit(r)
+				const track: Track | null = await YTSearchTrack.getTrack(query)
+
+				// Validate that track was found
+				if (track == null) {
+					await ((await i.fetchReply()) as Message).edit(
+						`Sorry, we could not process your query: ${query}`
+					)
 					setTimeout(() => {
 						i.deleteReply()
 					}, 5000)
+				} else {
+					// Create session if needed
+					let bNewSession = false
+					if (session === undefined) {
+						session = this.startSession(vc, i.fetchReply())
+						bNewSession = true
+					}
+
+					// Add track to queue
+					await session.play(track)
+
+					// Reply
+					if (!bNewSession) {
+						await ((await i.fetchReply()) as Message).edit(
+							`Added [${track.info.title}](${track.url}) to the queue.`
+						)
+						setTimeout(() => {
+							i.deleteReply()
+						}, 5000)
+					}
 				}
-				break
+				return
 		}
 
 		// Confirm existing session

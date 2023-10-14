@@ -18,11 +18,11 @@ class ReplyVM {
 	 * Update ViewModel
 	 */
 	public async render(
-		track: Track | undefined,
+		track: Track | null,
 		queue: Queue<Track>,
 		paused: boolean
 	): Promise<void> {
-		if (typeof track !== 'undefined')
+		if (track != null)
 			(await this._replyMessage).edit(
 				await this.busyPlayer(track, queue, paused)
 			)

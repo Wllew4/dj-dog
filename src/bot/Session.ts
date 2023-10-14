@@ -1,6 +1,5 @@
 import Voice from './Voice'
 import Track from '../music/Track'
-import YTSearchTrack from '../yt/SearchTrack'
 import ReplyVM from './ReplyVM'
 import Queue from '../music/Queue'
 import DJDog from './DJDog'
@@ -11,7 +10,7 @@ import Log from '../Log'
 
 export default class Session {
 	public queue: Queue<Track> = new Queue<Track>()
-	public currentTrack: Track | undefined
+	public currentTrack: Track | null = null
 
 	private static readonly TIMEOUT_TIME: number = 60
 	private timeout: NodeJS.Timeout
@@ -46,13 +45,13 @@ export default class Session {
 	/**
 	 * Call to change songs
 	 */
-	private async refreshPlayer() {
+	private refreshPlayer() {
 		// If the queue is empty, start the disconnect timer
 		// and do not progress to next track
 		// Otherwise, end potential existing timers
 		if (this.queue.isEmpty()) {
 			this.startTimeout()
-			this.currentTrack = undefined
+			this.currentTrack = null
 			this.updateVM()
 			return
 		} else clearTimeout(this.timeout)
@@ -71,7 +70,7 @@ export default class Session {
 		this.updateVM()
 	}
 
-	private async updateVM() {
+	private updateVM() {
 		this.replyVM.render(this.currentTrack, this.queue, this.voice.paused)
 	}
 
@@ -87,7 +86,7 @@ export default class Session {
 	/**
 	 * Disconnects the bot from its voice channel
 	 */
-	public async leave() {
+	public leave() {
 		this.voice.kill()
 		this.replyVM.remove()
 	}
@@ -96,16 +95,12 @@ export default class Session {
 	 * Adds a song to the queue
 	 * @param query The url/query for the song to queue up
 	 */
-	public async play(query: string): Promise<string> {
-		let track: Track | null = await YTSearchTrack.getTrack(query)
-		if (track == null)
-			return `Sorry, we could not process your query: ${query}`
-
-		this.queue.add(track)
-		this.refreshPlayer()
-		this.updateVM()
-
-		return `Added [${track.info.title}](${track.url}) to the queue.`
+	public play(track: Track) {
+		if (track != null) {
+			this.queue.add(track)
+			this.refreshPlayer()
+			this.updateVM()
+		}
 	}
 
 	/**
@@ -113,7 +108,7 @@ export default class Session {
 	 * @param i Index for removal
 	 * @returns the Track removed
 	 */
-	public async remove(i: number): Promise<string> {
+	public remove(i: number): string {
 		let removed = this.queue.remove(i - 1)
 		this.updateVM()
 		if (removed) return `Removed ${removed.info.title} from the queue!`
@@ -124,7 +119,7 @@ export default class Session {
 	 * Skips the current song
 	 * @returns true if there is another track, false if the queue is empty
 	 */
-	public async skip(): Promise<string> {
+	public skip(): string {
 		if (this.voice.isIdle()) return 'The queue is empty!'
 		this.voice.finishSong()
 		this.updateVM()
@@ -135,7 +130,7 @@ export default class Session {
 	 * Pauses/unpauses playback
 	 * @returns true if paused, false if unpaused
 	 */
-	public async pause(): Promise<string> {
+	public pause(): string {
 		if (this.voice.isIdle() || this.voice.isBuffering())
 			return 'Not currently playing anything'
 		const paused = this.voice.pause()
