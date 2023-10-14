@@ -1,14 +1,18 @@
+import fs from 'fs'
+
 /**
  * Basic logging functionality
  */
 export default class Log {
+	private static LOG_FILE = `./logs/${new Date().toISOString()}.log`
+
 	/**
 	 * Get the uptime prefix
 	 * @returns Prefix including current uptime
 	 */
 	private static prefix(): string {
 		const uptime: string = process.uptime().toFixed(3).padStart(10, '0')
-		return '[ ' + uptime + ' ]: '
+		return `[ ${uptime} ]: `
 	}
 
 	/**
@@ -16,7 +20,9 @@ export default class Log {
 	 * @param msg message to log
 	 */
 	public static logSystem(msg: string) {
-		console.log(Log.prefix() + msg)
+		const _msg = `${Log.prefix()} ${msg}`
+		console.log(_msg)
+		fs.writeFile(this.LOG_FILE, `${_msg}\n`, { flag: 'a+'}, () => {})
 	}
 
 	/**
@@ -24,6 +30,8 @@ export default class Log {
 	 * @param msg message to log
 	 */
 	public static logSystemErr(msg: any) {
-		console.error(Log.prefix() + msg)
+		const _msg = `${Log.prefix()} ERR: ${msg}`
+		console.log(_msg)
+		fs.writeFile(this.LOG_FILE, `${_msg}\n`, { flag: 'a+'}, () => {})
 	}
 }

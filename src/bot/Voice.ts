@@ -65,13 +65,8 @@ export default class Voice {
 	 * @param track the track to stream
 	 */
 	public stream(track: Track) {
-		try {
-			const resource = this.ytAudioStream.createResource(track)
-			this.audioPlayer.play(resource)
-		} catch (err) {
-			console.log('here')
-			Log.logSystemErr(err)
-		}
+		const resource = this.ytAudioStream.createResource(track)
+		this.audioPlayer.play(resource)
 	}
 
 	/**
