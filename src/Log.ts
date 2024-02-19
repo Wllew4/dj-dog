@@ -7,6 +7,15 @@ export default class Log {
 	private static LOG_FILE = `./logs/${new Date().toISOString()}.log`
 
 	/**
+	 * Initialize logging
+	 */
+	public static init() {
+		process.on('uncaughtException', (e) => {
+			this.logSystemErr(e.message)
+		})
+	}
+
+	/**
 	 * Get the uptime prefix
 	 * @returns Prefix including current uptime
 	 */
